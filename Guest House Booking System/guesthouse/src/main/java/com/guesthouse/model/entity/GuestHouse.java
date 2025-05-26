@@ -27,7 +27,8 @@ public class GuestHouse {
     private String description;
 
     @Column(nullable = false)
-    private boolean isActive;
+    @Builder.Default
+    private Boolean isActive = true;
 
     @OneToMany(mappedBy = "guestHouse", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
