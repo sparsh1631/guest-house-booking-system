@@ -1,0 +1,169 @@
+/* auth.css - Modern Card UI */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: #2e2e2e;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* White form card */
+.form-box {
+  background-color: #ffffff;
+  padding: 3rem 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 400px;
+  animation: fadeIn 0.4s ease-out;
+  transition: all 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.form-box h2 {
+  color: #1e1e1e;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+}
+
+.form-box p.subtitle {
+  text-align: center;
+  color: #777;
+  font-size: 1rem;
+  margin-bottom: 2rem;
+}
+
+.form-box input {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  background-color: #fafafa;
+  font-size: 1rem;
+  margin-bottom: 1.2rem;
+  transition: 0.3s;
+}
+
+.form-box input:focus {
+  border-color: #1e90ff;
+  outline: none;
+  background-color: #fff;
+  box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.15);
+}
+
+.form-box input::placeholder {
+  color: #aaa;
+}
+
+/* Password visibility icon */
+.password-eye {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+/* Remember and Forgot row */
+.remember-forgot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 1.5rem;
+}
+
+.remember-forgot input[type="checkbox"] {
+  margin-right: 0.4rem;
+}
+
+/* Main login button */
+.form-box button {
+  width: 100%;
+  padding: 1rem;
+  background-color: #1e1e1e;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+  margin-bottom: 1rem;
+}
+
+.form-box button:hover {
+  background-color: #333;
+  transform: scale(1.02);
+}
+
+/* Alternate login button */
+.alt-login {
+  width: 100%;
+  padding: 0.9rem;
+  background-color: #f1f1f1;
+  border: none;
+  border-radius: 12px;
+  text-align: center;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.3s ease;
+}
+
+.alt-login:hover {
+  background-color: #e1e1e1;
+}
+
+.alt-login i {
+  margin-right: 0.5rem;
+}
+
+/* Forgot / toggle text */
+.toggle-text {
+  text-align: center;
+  color: #333;
+  font-size: 0.9rem;
+  margin-top: 1.5rem;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.toggle-text:hover {
+  color: #1e90ff;
+  text-decoration: underline;
+}
+
+/* Error Message */
+.error-message {
+  color: #ff4d4d;
+  font-size: 0.9rem;
+  margin-top: -0.6rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .form-box {
+    padding: 2rem 1.5rem;
+    margin: 0 1rem;
+  }
+
+  .form-box h2 {
+    font-size: 1.7rem;
+  }
+
+  .form-box input,
+  .form-box button {
+    font-size: 0.95rem;
+  }
+}
