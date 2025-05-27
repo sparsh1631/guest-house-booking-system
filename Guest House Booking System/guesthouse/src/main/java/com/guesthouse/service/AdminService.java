@@ -1,21 +1,12 @@
 package com.guesthouse.service;
 
-import com.guesthouse.dto.GuestHouseDTO;
-import com.guesthouse.dto.RoomDTO;
-import com.guesthouse.dto.BedDTO;
+import com.guesthouse.dto.*;
+import com.guesthouse.model.enums1.BookingStatus;
+
 import java.util.List;
 
-/**
- * AdminService is an interface that defines all the operations
- * an admin can perform in the Guest House Booking System.
- *
- * It handles:
- * - Guest House management
- * - Room management
- * - Bed management
- */
-
 public interface AdminService {
+
     // Guest House CRUD
     GuestHouseDTO createGuestHouse(GuestHouseDTO guestHouseDTO);
     GuestHouseDTO updateGuestHouse(Long id, GuestHouseDTO guestHouseDTO);
@@ -34,4 +25,13 @@ public interface AdminService {
     BedDTO updateBed(Long id, BedDTO bedDTO);
     List<BedDTO> getBedsByRoom(Long roomId);
     void deleteBed(Long id);
+
+    // ✅ Booking Management for Admin
+    List<BookingResponseDTO> getAllBookings();
+    List<BookingResponseDTO> getPendingBookings();
+    BookingResponseDTO getBookingById(Long id);
+    BookingResponseDTO approveBooking(Long id, String notes);
+    BookingResponseDTO rejectBooking(Long id, String reason);
+    BookingResponseDTO cancelBooking(Long id, String reason);
+    List<BookingResponseDTO> getBookingsByGuestHouse(Long guestHouseId);
 }
