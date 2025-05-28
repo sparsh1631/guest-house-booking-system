@@ -44,7 +44,7 @@ const Login = ({ onSwitchToRegister, onForgotPassword,  onLoginSuccess }) => {
           onChange={handleChange}
           required
         />
-        <button type="submit">Login</button>
+        <button type="submit" name="/register">Login</button>
       </form>
       <p className="toggle-text" onClick={onForgotPassword}>Forgot Password?</p>
       <p className="toggle-text" onClick={onSwitchToRegister}>
