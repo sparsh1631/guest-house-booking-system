@@ -1,6 +1,7 @@
 package com.guesthouse.service.impl;
 
 import com.guesthouse.dto.BookingDTO;
+import com.guesthouse.dto.BookingRequestDTO;
 import com.guesthouse.exception.ResourceNotFoundException;
 import com.guesthouse.model.entity.Booking;
 import com.guesthouse.model.entity.Room;
@@ -27,19 +28,17 @@ public class BookingServiceImpl implements BookingService {
     private final ModelMapper modelMapper;
 
     @Override
-    public BookingDTO createBooking(BookingDTO bookingDTO) {
-        // Fetch room and user for foreign key mapping
-        Room room = roomRepository.findById(bookingDTO.getRoomId())
+    public BookingDTO createBooking(BookingRequestDTO bookingRequestDTO) {
+        Room room = roomRepository.findById(bookingRequestDTO.getRoomId())
                 .orElseThrow(() -> new ResourceNotFoundException("Room not found"));
 
-        User user = userRepository.findById(bookingDTO.getUserId())
+        User user = userRepository.findById(bookingRequestDTO.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        // Convert DTO to entity
-        Booking booking = modelMapper.map(bookingDTO, Booking.class);
+        Booking booking = modelMapper.map(bookingRequestDTO, Booking.class);
         booking.setRoom(room);
         booking.setUser(user);
-        booking.setStatus(BookingStatus.PENDING); // Default status
+        booking.setStatus(BookingStatus.PENDING);
 
         Booking savedBooking = bookingRepository.save(booking);
         return modelMapper.map(savedBooking, BookingDTO.class);
