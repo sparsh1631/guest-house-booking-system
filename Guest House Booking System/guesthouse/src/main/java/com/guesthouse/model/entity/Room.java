@@ -7,6 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(
+        name = "room",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"guest_house_id", "room_number"})
+        }
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,7 +23,7 @@ public class Room {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "room_number", nullable = false)
     private String roomNumber;
 
     @Column(nullable = false)
@@ -32,8 +38,8 @@ public class Room {
     private GuestHouse guestHouse;
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
-    @ToString.Exclude //Prevents infinite recursion in toString() (Bed may point back to Room)
-    @Builder.Default // Ensures this list is initialized even when using builder
+    @ToString.Exclude
+    @Builder.Default
     private List<Bed> beds = new ArrayList<>();
 
     // Helper method to associate a bed with this room
@@ -42,3 +48,6 @@ public class Room {
         bed.setRoom(this);
     }
 }
+
+
+

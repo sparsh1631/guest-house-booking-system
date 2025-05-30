@@ -4,13 +4,13 @@
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background: #2e2e2e;
+  background: #809583;
   font-family: 'Poppins', sans-serif;
 }
 
 /* White form card */
 .form-box {
-  background-color: #ffffff;
+  background-color: #bbc2b9;
   padding: 3rem 2.5rem;
   border-radius: 16px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
@@ -163,7 +163,7 @@
   }
 
   .form-box input,
-  .form-box button {
+  .form-box button  {
     font-size: 0.95rem;
   }
 }

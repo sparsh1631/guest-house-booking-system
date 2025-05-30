@@ -20,12 +20,16 @@ public class AuthController {
     private AuthService1 authService;
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@Valid @RequestBody UserRegistration1DTO dto) {
-        return ResponseEntity.ok(authService.register(dto));
+    public ResponseEntity<AuthResponseDTO> register(@Valid @RequestBody UserRegistration1DTO dto) {
+        String result = authService.register(dto);
+        AuthResponseDTO response = new AuthResponseDTO(result, ""); // Empty token for registration
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@Valid @RequestBody UserLogin1DTO dto) {
-        return ResponseEntity.ok(authService.login(dto));
+    public ResponseEntity<AuthResponseDTO> login(@Valid @RequestBody UserLogin1DTO dto) {
+        String token = authService.login(dto); // Assuming this returns the token
+        AuthResponseDTO response = new AuthResponseDTO("Login successful", token);
+        return ResponseEntity.ok(response);
     }
 }
