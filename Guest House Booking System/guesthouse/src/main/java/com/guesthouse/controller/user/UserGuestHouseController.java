@@ -5,10 +5,11 @@ import com.guesthouse.dto.RoomDTO;
 import com.guesthouse.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+@PreAuthorize("hasAuthority('USER')")
 @RestController
 @RequestMapping("/api/user/guesthouses")
 public class UserGuestHouseController {
