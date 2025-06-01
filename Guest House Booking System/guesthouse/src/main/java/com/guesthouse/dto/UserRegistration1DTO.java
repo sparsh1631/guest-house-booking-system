@@ -25,7 +25,7 @@ public class UserRegistration1DTO {
     @NotBlank(message = "Password is required")
     private String password;
 
-    @NotBlank(message = "Role is required")
-    private String role;
+//    @NotBlank(message = "Role is required")
+//    private String role;
 
 }

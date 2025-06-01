@@ -15,7 +15,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import com.guesthouse.model.enums1.Role;  // Add this import
+import com.guesthouse.model.enums1.Role;
+
 @Service
 public class AuthServiceImpl1 implements AuthService1 {
 
@@ -34,29 +35,37 @@ public class AuthServiceImpl1 implements AuthService1 {
     @Autowired
     private UserDetailsService userDetailsService;
 
+    /**
+     * Registers a new user with default role USER.
+     */
     @Override
     public String register(UserRegistration1DTO dto) {
-        // Check if user already exists
+        // Check if user already exists by email
         if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
             throw new UserAlreadyExistsException("Email already registered.");
         }
 
-        // Create new user
+        // Create new User object
         User user = new User();
         user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());
-        user.setPassword(passwordEncoder.encode(dto.getPassword())); // Encode password
-        user.setRole(Role.valueOf(dto.getRole().toUpperCase())); // Convert to enum
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
 
-        // Save user
+        // Assign default role USER for frontend registration
+        user.setRole(Role.USER);
+
+        // Save user to database
         userRepository.save(user);
         return "User registered successfully!";
     }
 
+    /**
+     * Authenticates user credentials and returns JWT token.
+     */
     @Override
     public String login(UserLogin1DTO dto) {
         try {
-            // Authenticate user credentials
+            // Authenticate using Spring Security
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             dto.getEmail(),
@@ -64,10 +73,10 @@ public class AuthServiceImpl1 implements AuthService1 {
                     )
             );
 
-            // Load user details
+            // Load user details by email
             final UserDetails userDetails = userDetailsService.loadUserByUsername(dto.getEmail());
 
-            // Generate JWT token
+            // Generate and return JWT token
             return jwtUtil.generateToken(userDetails.getUsername());
 
         } catch (BadCredentialsException e) {

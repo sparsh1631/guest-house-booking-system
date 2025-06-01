@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Import for programmatic navigation
-import '../../styles/auth.css'; // Importing custom auth styles
+import { useNavigate } from 'react-router-dom';
+import '../../styles/auth.css';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [errors, setErrors] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [serverError, setServerError] = useState('');
-  const navigate = useNavigate(); // Initialize navigate function
+  const navigate = useNavigate();
 
-  // Validation for email field
   const validate = () => {
     if (!email.trim()) {
       setErrors('Email is required');
@@ -23,7 +22,6 @@ const ForgotPassword = () => {
     return true;
   };
 
-  // Handle forgot password form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
@@ -39,48 +37,38 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="auth-container">
-      <h2>Forgot Password</h2>
+    <div className="auth-page-wrapper">
+      <div className="auth-container">
+        <h2>Forgot Password</h2>
+        {successMessage && <div className="alert alert-success">{successMessage}</div>}
+        {serverError && <div className="alert alert-danger">{serverError}</div>}
 
-      {/* Success and error messages */}
-      {successMessage && <div className="alert alert-success">{successMessage}</div>}
-      {serverError && <div className="alert alert-danger">{serverError}</div>}
+        <form onSubmit={handleSubmit} noValidate>
+          <div className="mb-3">
+            <label className="form-label">Email</label>
+            <input
+              type="email"
+              className={`form-control ${errors ? 'is-invalid' : ''}`}
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setErrors('');
+              }}
+            />
+            {errors && <div className="invalid-feedback">{errors}</div>}
+          </div>
 
-      {/* Forgot Password Form */}
-      <form onSubmit={handleSubmit} noValidate>
-        <div className="mb-3">
-          <label className="form-label">Email</label>
-          <input
-            type="email"
-            className={`form-control ${errors ? 'is-invalid' : ''}`}
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              setErrors('');
-            }}
-          />
-          {errors && <div className="invalid-feedback">{errors}</div>}
+          <button type="submit" className="btn btn-primary w-100">Send Reset Link</button>
+        </form>
+
+        <div className="mt-3 text-center">
+          <p>
+            Remembered your password?{' '}
+            <a href="#!" onClick={(e) => { e.preventDefault(); navigate('/login'); }}>
+              Back to Login
+            </a>
+          </p>
         </div>
-
-        <button type="submit" className="btn btn-primary w-100">
-          Send Reset Link
-        </button>
-      </form>
-
-      {/* Navigation link back to Login page */}
-      <div className="mt-3 text-center">
-        <p>
-          Remembered your password?{' '}
-          <a
-            href="#!"
-            onClick={(e) => {
-              e.preventDefault();
-              navigate('/login'); // Navigate to login page
-            }}
-          >
-            Back to Login
-          </a>
-        </p>
       </div>
     </div>
   );
