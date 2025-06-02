@@ -19,9 +19,7 @@ const Login = () => {
 
     if (!formData.password.trim()) {
       newErrors.password = 'Password is required';
-    } else if (
-      !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(formData.password)
-    ) {
+    } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(formData.password)) {
       newErrors.password = 'Password must contain 8+ characters, uppercase, lowercase, digit, and special character';
     }
 
@@ -41,18 +39,14 @@ const Login = () => {
     try {
       const res = await axios.post('http://localhost:8080/api/auth/login', formData);
       const token = res.data.token;
-
       localStorage.setItem('token', token);
 
-      // Fetch user role from backend using token
+      // Fetch role using token
       const userInfoRes = await axios.get('http://localhost:8080/api/auth/userinfo', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` }
       });
 
       const role = userInfoRes.data.role;
-
       role === 'ADMIN' ? navigate('/admin/dashboard') : navigate('/user/booking');
     } catch (err) {
       setServerError(err.response?.data?.message || 'Login failed');

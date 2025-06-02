@@ -19,4 +19,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     //this method to find bookings where room is in the provided list
     List<Booking> findByRoomIn(List<Room> rooms);
 
+    List<Booking> findByUserEmail(String email);
+
 }

@@ -28,18 +28,16 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDTO createBooking(BookingDTO bookingDTO) {
-        // Fetch room and user for foreign key mapping
         Room room = roomRepository.findById(bookingDTO.getRoomId())
                 .orElseThrow(() -> new ResourceNotFoundException("Room not found"));
 
         User user = userRepository.findById(bookingDTO.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        // Convert DTO to entity
         Booking booking = modelMapper.map(bookingDTO, Booking.class);
         booking.setRoom(room);
         booking.setUser(user);
-        booking.setStatus(BookingStatus.PENDING); // Default status
+        booking.setStatus(BookingStatus.PENDING);
 
         Booking savedBooking = bookingRepository.save(booking);
         return modelMapper.map(savedBooking, BookingDTO.class);
@@ -69,5 +67,14 @@ public class BookingServiceImpl implements BookingService {
         booking.setStatus(status);
         Booking updated = bookingRepository.save(booking);
         return modelMapper.map(updated, BookingDTO.class);
+    }
+
+    // ✅ NEW
+    @Override
+    public List<BookingDTO> getBookingsByEmail(String email) {
+        List<Booking> bookings = bookingRepository.findByUserEmail(email);
+        return bookings.stream()
+                .map(b -> modelMapper.map(b, BookingDTO.class))
+                .collect(Collectors.toList());
     }
 }

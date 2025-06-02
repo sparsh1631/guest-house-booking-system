@@ -1,0 +1,87 @@
+/* === Layout Structure === */
+
+.dashboard-wrapper {
+  display: flex;
+  width: 100vw;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Sidebar Styles */
+.sidebar {
+  width: 230.5px;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: linear-gradient(to bottom, #1d3557, #457b9d);
+  color: white;
+  padding-top: 20px;
+  z-index: 100;
+}
+
+.sidebar h5 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #f1faee;
+}
+
+.sidebar .nav-link {
+  color: white;
+  padding: 10px 15px;
+  margin: 5px 0;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #f1faee;
+  text-decoration: none;
+}
+
+/* Main Content (beside sidebar) */
+.main-content {
+  margin-left: 230.5px; /* Sidebar width */
+  flex-grow: 1;
+  width: calc(100vw - 230.5px);
+  display: flex;
+  flex-direction: column;
+  background-color: #f5f8fa;
+}
+
+/* Page content area */
+.content-area {
+  padding: 30px;
+  min-height: 100vh;
+}
+
+/* Dashboard container shared by pages */
+.dashboard-container {
+  padding: 20px;
+  background-color: #f8f9fa;
+}
+
+/* Dashboard card look */
+.dashboard-card {
+  transition: transform 0.2s ease-in-out;
+  border: none;
+  border-radius: 10px;
+  background-color: #ffffff;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Footer */
+.footer {
+  background-color: #1d3557;
+  color: #fff;
+  text-align: center;
+  padding: 10px;
+  font-size: 14px;
+  margin-top: auto;
+}

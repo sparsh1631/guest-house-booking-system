@@ -43,4 +43,10 @@ public class UserBookingController {
     public ResponseEntity<List<BookingDTO>> getBookingsByStatus(@RequestParam BookingStatus status) {
         return ResponseEntity.ok(bookingService.getBookingsByStatus(status));
     }
+
+    @GetMapping("/my")
+    public ResponseEntity<List<BookingDTO>> getMyBookings(@RequestParam String email) {
+        List<BookingDTO> bookings = bookingService.getBookingsByEmail(email);
+        return ResponseEntity.ok(bookings);
+    }
 }

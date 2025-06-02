@@ -10,4 +10,5 @@ public interface BookingService {
     List<BookingDTO> getUserBookings(Long userId);                      // User views their own bookings
     List<BookingDTO> getBookingsByStatus(BookingStatus status);         // Admin filters bookings
     BookingDTO updateBookingStatus(Long bookingId, BookingStatus status); // Admin updates status
+    List<BookingDTO> getBookingsByEmail(String email);
 }
