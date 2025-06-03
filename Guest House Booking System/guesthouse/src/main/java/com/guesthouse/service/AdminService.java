@@ -15,6 +15,8 @@ public interface AdminService {
     void deleteGuestHouse(Long id);
 
     // Room Management
+    List<RoomDTO> getAllRooms();
+    RoomDTO getRoomById(Long id);
     RoomDTO addRoomToGuestHouse(RoomDTO roomDTO);
     RoomDTO updateRoom(Long id, RoomDTO roomDTO);
     List<RoomDTO> getRoomsByGuestHouse(Long guestHouseId);

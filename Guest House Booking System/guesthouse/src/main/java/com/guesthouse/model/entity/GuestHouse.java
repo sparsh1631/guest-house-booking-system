@@ -1,17 +1,12 @@
 package com.guesthouse.model.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "guest_houses")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class GuestHouse {
 
     @Id
@@ -27,13 +22,61 @@ public class GuestHouse {
     private String description;
 
     @Column(nullable = false)
-    @Builder.Default
     private Boolean isActive = true;
 
     @OneToMany(mappedBy = "guestHouse", cascade = CascadeType.ALL, orphanRemoval = true)
-    @ToString.Exclude
-    @Builder.Default
     private List<Room> rooms = new ArrayList<>();
+
+    public GuestHouse() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
+
+    public List<Room> getRooms() {
+        return rooms;
+    }
+
+    public void setRooms(List<Room> rooms) {
+        this.rooms = rooms;
+    }
 
     public void addRoom(Room room) {
         rooms.add(room);

@@ -19,8 +19,6 @@ const Login = () => {
 
     if (!formData.password.trim()) {
       newErrors.password = 'Password is required';
-    } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(formData.password)) {
-      newErrors.password = 'Password must contain 8+ characters, uppercase, lowercase, digit, and special character';
     }
 
     setErrors(newErrors);
@@ -37,30 +35,55 @@ const Login = () => {
     if (!validate()) return;
 
     try {
+      // Clear any existing session data
+      localStorage.clear();
+      
       // Login request
+      console.log('Sending login request with:', formData);
       const res = await axios.post('http://localhost:8080/api/auth/login', formData);
+      console.log('Login response:', res.data);
       const token = res.data.token;
+      
+      // Store token
       localStorage.setItem('token', token);
-      localStorage.setItem('userEmail', formData.email);
 
       // Fetch user info using token
+      console.log('Fetching user info with token:', token);
       const userInfoRes = await axios.get('http://localhost:8080/api/auth/userinfo', {
         headers: { Authorization: `Bearer ${token}` }
       });
+      console.log('User info response:', userInfoRes.data);
 
-      const { role, id, name, firstName, lastName } = userInfoRes.data;
+      // The role is directly in userInfoRes.data.token
+      const role = userInfoRes.data.token;
+      console.log('User role:', role);
       
       // Store user information
-      localStorage.setItem('userId', id);
-      // Use name if available, otherwise construct from firstName and lastName
-      const displayName = name || `${firstName || ''} ${lastName || ''}`.trim();
-      localStorage.setItem('userName', displayName || formData.email.split('@')[0]);
+      localStorage.setItem('userId', formData.email);
+      localStorage.setItem('userRole', role);
+      localStorage.setItem('userEmail', formData.email);
+      localStorage.setItem('userName', formData.email.split('@')[0]);
 
       // Navigate based on role
-      role === 'ADMIN' ? navigate('/admin/dashboard') : navigate('/user/dashboard');
+      console.log('Navigating based on role:', role);
+      if (role === 'ADMIN') {
+        console.log('Redirecting to admin dashboard');
+        navigate('/admin/dashboard', { replace: true });
+      } else {
+        console.log('Redirecting to user dashboard');
+        navigate('/user/dashboard', { replace: true });
+      }
+
+      // Force a page reload to ensure clean state
+      window.location.reload();
+      
     } catch (err) {
       console.error('Login error:', err);
-      setServerError(err.response?.data?.message || 'Login failed. Please try again.');
+      if (err.response?.status === 401) {
+        setServerError('Invalid email or password');
+      } else {
+        setServerError(err.response?.data?.message || 'Login failed. Please try again.');
+      }
     }
   };
 
@@ -78,6 +101,7 @@ const Login = () => {
               className={`form-control ${errors.email ? 'is-invalid' : ''}`}
               value={formData.email}
               onChange={handleChange}
+              placeholder="Enter your email"
             />
             {errors.email && <div className="invalid-feedback">{errors.email}</div>}
           </div>
@@ -90,6 +114,7 @@ const Login = () => {
               className={`form-control ${errors.password ? 'is-invalid' : ''}`}
               value={formData.password}
               onChange={handleChange}
+              placeholder="Enter your password"
             />
             {errors.password && <div className="invalid-feedback">{errors.password}</div>}
           </div>

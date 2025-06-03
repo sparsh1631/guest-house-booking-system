@@ -18,6 +18,22 @@ const AdminSidebar = () => {
         </NavLink>
 
         <NavLink 
+          to="/admin/guest-houses" 
+          className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+        >
+          <i className="bi bi-building me-2"></i>
+          Guest Houses
+        </NavLink>
+
+        <NavLink 
+          to="/admin/rooms" 
+          className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+        >
+          <i className="bi bi-door-closed me-2"></i>
+          Rooms
+        </NavLink>
+
+        <NavLink 
           to="/admin/reservation-list" 
           className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
         >

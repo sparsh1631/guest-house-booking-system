@@ -10,21 +10,32 @@ import com.guesthouse.repository.BookingRepository;
 import com.guesthouse.repository.RoomRepository;
 import com.guesthouse.repository.UserRepository;
 import com.guesthouse.service.BookingService;
-import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+
+    @Autowired
+    public BookingServiceImpl(
+            BookingRepository bookingRepository,
+            RoomRepository roomRepository,
+            UserRepository userRepository,
+            ModelMapper modelMapper) {
+        this.bookingRepository = bookingRepository;
+        this.roomRepository = roomRepository;
+        this.userRepository = userRepository;
+        this.modelMapper = modelMapper;
+    }
 
     @Override
     public BookingDTO createBooking(BookingDTO bookingDTO) {
@@ -69,7 +80,6 @@ public class BookingServiceImpl implements BookingService {
         return modelMapper.map(updated, BookingDTO.class);
     }
 
-    // ✅ NEW
     @Override
     public List<BookingDTO> getBookingsByEmail(String email) {
         List<Booking> bookings = bookingRepository.findByUserEmail(email);

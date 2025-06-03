@@ -1,114 +1,147 @@
-import React from 'react';
-import { Card, Row, Col, Container } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { Container, Row, Col, Card } from 'react-bootstrap';
+import { FaBed, FaHotel, FaUsers, FaClipboardList } from 'react-icons/fa';
+import { dashboardAPI } from '../../utils/api';
+import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import '../../styles/dashboard.css';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const [stats, setStats] = useState({
+    totalGuestHouses: 0,
+    totalRooms: 0,
+    totalBeds: 0,
+    availableRooms: 0,
+    occupiedRooms: 0,
+    totalBookings: 0,
+    pendingRequests: 0,
+    totalRevenue: 0,
+    totalUsers: 0
+  });
 
-  const handleCardClick = (path) => {
-    navigate(path);
-  };
+  useEffect(() => {
+    // Fetch dashboard statistics
+    const fetchStats = async () => {
+      try {
+        const data = await dashboardAPI.getStats();
+        setStats(data);
+      } catch (error) {
+        console.error('Error fetching dashboard stats:', error);
+        toast.error('Failed to load dashboard statistics');
+      }
+    };
+
+    fetchStats();
+    // Refresh stats every 5 minutes
+    const interval = setInterval(fetchStats, 300000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const StatCard = ({ title, value, icon, color, onClick }) => (
+    <Card 
+      className="mb-4 shadow-sm" 
+      style={{ cursor: onClick ? 'pointer' : 'default' }}
+      onClick={onClick}
+    >
+      <Card.Body>
+        <div className="d-flex justify-content-between align-items-center">
+          <div>
+            <h6 className="text-muted mb-1">{title}</h6>
+            <h3 className="mb-0">{value}</h3>
+          </div>
+          <div className={`rounded-circle p-3 bg-${color} bg-opacity-10`}>
+            {icon}
+          </div>
+        </div>
+      </Card.Body>
+    </Card>
+  );
 
   return (
-    <Container fluid className="dashboard-container p-4">
-      <div className="content-header">
-        <h2 className="mb-3">Admin Dashboard</h2>
-        <p className="text-muted">Manage guest house bookings, reservations, and system settings.</p>
-      </div>
-
-      <Row className="mt-4 g-4">
-        <Col md={4}>
-          <Card 
-            className="shadow-sm dashboard-card h-100 cursor-pointer"
-            onClick={() => handleCardClick('/admin/reservation-list')}
-          >
-            <Card.Body className="d-flex flex-column">
-              <Card.Title className="d-flex align-items-center">
-                <span className="me-2">📋</span>
-                Reservation List
-              </Card.Title>
-              <Card.Text>
-                View and manage all guest house reservations and bookings.
-              </Card.Text>
-            </Card.Body>
-          </Card>
+    <Container fluid className="p-4">
+      <h2 className="mb-4">Dashboard</h2>
+      <Row>
+        <Col lg={3} sm={6}>
+          <StatCard
+            title="Total Guest Houses"
+            value={stats.totalGuestHouses}
+            icon={<FaHotel size={24} className="text-primary" />}
+            color="primary"
+            onClick={() => navigate('/admin/guest-houses')}
+          />
         </Col>
-
-        <Col md={4}>
-          <Card 
-            className="shadow-sm dashboard-card h-100 cursor-pointer"
-            onClick={() => handleCardClick('/admin/pending-requests')}
-          >
-            <Card.Body className="d-flex flex-column">
-              <Card.Title className="d-flex align-items-center">
-                <span className="me-2">⏳</span>
-                Pending Requests
-              </Card.Title>
-              <Card.Text>
-                Review and approve pending booking requests from users.
-              </Card.Text>
-            </Card.Body>
-          </Card>
+        <Col lg={3} sm={6}>
+          <StatCard
+            title="Total Rooms"
+            value={stats.totalRooms}
+            icon={<FaHotel size={24} className="text-success" />}
+            color="success"
+            onClick={() => navigate('/admin/rooms')}
+          />
         </Col>
-
-        <Col md={4}>
-          <Card 
-            className="shadow-sm dashboard-card h-100 cursor-pointer"
-            onClick={() => handleCardClick('/admin/reports')}
-          >
-            <Card.Body className="d-flex flex-column">
-              <Card.Title className="d-flex align-items-center">
-                <span className="me-2">📊</span>
-                Reports
-              </Card.Title>
-              <Card.Text>
-                Generate and view booking reports and analytics.
-              </Card.Text>
-            </Card.Body>
-          </Card>
+        <Col lg={3} sm={6}>
+          <StatCard
+            title="Total Beds"
+            value={stats.totalBeds}
+            icon={<FaBed size={24} className="text-info" />}
+            color="info"
+          />
         </Col>
-
-        <Col md={6}>
-          <Card 
-            className="shadow-sm dashboard-card h-100 cursor-pointer"
-            onClick={() => handleCardClick('/admin/master')}
-          >
-            <Card.Body className="d-flex flex-column">
-              <Card.Title className="d-flex align-items-center">
-                <span className="me-2">⚙️</span>
-                Master Settings
-              </Card.Title>
-              <Card.Text>
-                Manage guest houses, rooms, and system configurations.
-              </Card.Text>
-            </Card.Body>
-          </Card>
+        <Col lg={3} sm={6}>
+          <StatCard
+            title="Available Rooms"
+            value={stats.availableRooms}
+            icon={<FaHotel size={24} className="text-warning" />}
+            color="warning"
+            onClick={() => navigate('/admin/rooms')}
+          />
         </Col>
+      </Row>
 
-        <Col md={6}>
-          <Card 
-            className="shadow-sm dashboard-card h-100"
-          >
-            <Card.Body className="d-flex flex-column">
-              <Card.Title className="d-flex align-items-center">
-                <span className="me-2">📈</span>
-                Overview
-              </Card.Title>
-              <div className="d-flex justify-content-around mt-3">
-                <div className="text-center">
-                  <h3 className="mb-0">0</h3>
-                  <small className="text-muted">Total Bookings</small>
-                </div>
-                <div className="text-center">
-                  <h3 className="mb-0">0</h3>
-                  <small className="text-muted">Pending</small>
-                </div>
-                <div className="text-center">
-                  <h3 className="mb-0">0</h3>
-                  <small className="text-muted">Today's Check-ins</small>
-                </div>
-              </div>
+      <Row>
+        <Col lg={3} sm={6}>
+          <StatCard
+            title="Occupied Rooms"
+            value={stats.occupiedRooms}
+            icon={<FaHotel size={24} className="text-danger" />}
+            color="danger"
+            onClick={() => navigate('/admin/rooms')}
+          />
+        </Col>
+        <Col lg={3} sm={6}>
+          <StatCard
+            title="Total Bookings"
+            value={stats.totalBookings}
+            icon={<FaClipboardList size={24} className="text-primary" />}
+            color="primary"
+            onClick={() => navigate('/admin/reservation-list')}
+          />
+        </Col>
+        <Col lg={3} sm={6}>
+          <StatCard
+            title="Pending Requests"
+            value={stats.pendingRequests}
+            icon={<FaClipboardList size={24} className="text-warning" />}
+            color="warning"
+            onClick={() => navigate('/admin/pending-requests')}
+          />
+        </Col>
+        <Col lg={3} sm={6}>
+          <StatCard
+            title="Total Users"
+            value={stats.totalUsers}
+            icon={<FaUsers size={24} className="text-success" />}
+            color="success"
+          />
+        </Col>
+      </Row>
+
+      <Row>
+        <Col lg={12}>
+          <Card className="shadow-sm">
+            <Card.Body>
+              <h5 className="mb-4">Total Revenue</h5>
+              <h2 className="mb-0">₹{stats.totalRevenue?.toLocaleString() || 0}</h2>
             </Card.Body>
           </Card>
         </Col>

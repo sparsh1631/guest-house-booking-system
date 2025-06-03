@@ -8,7 +8,7 @@ import com.guesthouse.repository.PasswordResetTokenRepository;
 import com.guesthouse.repository.UserRepository;
 import com.guesthouse.service.PasswordService;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -17,12 +17,21 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 public class PasswordServiceImpl implements PasswordService {
 
     private final UserRepository userRepository;
     private final PasswordResetTokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
+
+    @Autowired
+    public PasswordServiceImpl(
+            UserRepository userRepository,
+            PasswordResetTokenRepository tokenRepository,
+            PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.tokenRepository = tokenRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     public String processForgotPassword(ForgotPasswordRequestDTO request) {  // Changed return type
@@ -41,8 +50,6 @@ public class PasswordServiceImpl implements PasswordService {
                 .expirationTime(LocalDateTime.now().plusMinutes(30))
                 .build();
         tokenRepository.save(resetToken); //Stores the token in your database with expiration time.
-
-
 
         return token;  // Return the generated token
     }

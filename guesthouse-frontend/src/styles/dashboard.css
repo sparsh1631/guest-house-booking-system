@@ -200,3 +200,32 @@ body {
 .shadow-sm {
   box-shadow: 0 .125rem .25rem rgba(0,0,0,.075)!important;
 }
+
+/* Admin dashboard specific styles */
+.admin-stats h6 {
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.admin-stats h3 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .content-wrapper {
+    padding: 1rem;
+  }
+  
+  .dashboard-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .dashboard-icon i {
+    font-size: 20px;
+  }
+}

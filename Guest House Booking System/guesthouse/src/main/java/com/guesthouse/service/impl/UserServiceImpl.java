@@ -17,14 +17,19 @@ import java.util.stream.Collectors;
 @Service
 public class UserServiceImpl implements UserService {
 
-    @Autowired
-    private GuestHouseRepository guestHouseRepository;
+    private final GuestHouseRepository guestHouseRepository;
+    private final RoomRepository roomRepository;
+    private final ModelMapper modelMapper;
 
     @Autowired
-    private RoomRepository roomRepository;
-
-    @Autowired
-    private ModelMapper modelMapper;
+    public UserServiceImpl(
+            GuestHouseRepository guestHouseRepository,
+            RoomRepository roomRepository,
+            ModelMapper modelMapper) {
+        this.guestHouseRepository = guestHouseRepository;
+        this.roomRepository = roomRepository;
+        this.modelMapper = modelMapper;
+    }
 
     @Override
     public List<GuestHouseDTO> getAllActiveGuestHouses() {
@@ -46,9 +51,13 @@ public class UserServiceImpl implements UserService {
         List<Room> rooms = roomRepository.findByGuestHouseId(guestHouseId);
         return rooms.stream()
                 .map(room -> {
-                    RoomDTO dto = modelMapper.map(room, RoomDTO.class);
-                    // Set guestHouseId manually since Room entity has guestHouseobject
-                    dto.setGuestHouseId(room.getGuestHouse().getId());
+                    RoomDTO dto = new RoomDTO();
+                    dto.setId(room.getId());
+                    dto.setRoomNumber(room.getRoomNumber());
+                    dto.setType(room.getType());
+                    dto.setPrice(room.getPrice());
+                    dto.setStatus(room.getStatus().toString());
+                    dto.setGuestHouseId(guestHouseId);
                     return dto;
                 })
                 .collect(Collectors.toList());

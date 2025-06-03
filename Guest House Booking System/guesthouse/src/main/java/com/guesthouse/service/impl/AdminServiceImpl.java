@@ -4,10 +4,11 @@ import com.guesthouse.dto.*;
 import com.guesthouse.model.entity.*;
 import com.guesthouse.model.enums1.BedStatus;
 import com.guesthouse.model.enums1.BookingStatus;
+import com.guesthouse.model.enums1.RoomStatus;
 import com.guesthouse.repository.*;
 import com.guesthouse.service.AdminService;
-import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,7 +16,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class AdminServiceImpl implements AdminService {
 
     private final GuestHouseRepository guestHouseRepository;
@@ -23,6 +23,20 @@ public class AdminServiceImpl implements AdminService {
     private final BedRepository bedRepository;
     private final BookingRepository bookingRepository;
     private final ModelMapper modelMapper;
+
+    @Autowired
+    public AdminServiceImpl(
+            GuestHouseRepository guestHouseRepository,
+            RoomRepository roomRepository,
+            BedRepository bedRepository,
+            BookingRepository bookingRepository,
+            ModelMapper modelMapper) {
+        this.guestHouseRepository = guestHouseRepository;
+        this.roomRepository = roomRepository;
+        this.bedRepository = bedRepository;
+        this.bookingRepository = bookingRepository;
+        this.modelMapper = modelMapper;
+    }
 
     // Guest House Operations
     @Override
@@ -70,12 +84,43 @@ public class AdminServiceImpl implements AdminService {
 
     // Room Operations
     @Override
+    public List<RoomDTO> getAllRooms() {
+        return roomRepository.findAll().stream()
+                .map(room -> {
+                    RoomDTO dto = new RoomDTO();
+                    dto.setId(room.getId());
+                    dto.setRoomNumber(room.getRoomNumber());
+                    dto.setType(room.getType());
+                    dto.setPrice(room.getPrice());
+                    dto.setStatus(room.getStatus().toString());
+                    dto.setGuestHouseId(room.getGuestHouse().getId());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public RoomDTO getRoomById(Long id) {
+        Room room = roomRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Room not found with id: " + id));
+        RoomDTO dto = new RoomDTO();
+        dto.setId(room.getId());
+        dto.setRoomNumber(room.getRoomNumber());
+        dto.setType(room.getType());
+        dto.setPrice(room.getPrice());
+        dto.setStatus(room.getStatus().toString());
+        dto.setGuestHouseId(room.getGuestHouse().getId());
+        return dto;
+    }
+
+    @Override
     @Transactional
     public RoomDTO addRoomToGuestHouse(RoomDTO roomDTO) {
         GuestHouse guestHouse = guestHouseRepository.findById(roomDTO.getGuestHouseId())
                 .orElseThrow(() -> new RuntimeException("Guest house not found"));
         Room room = modelMapper.map(roomDTO, Room.class);
         room.setGuestHouse(guestHouse);
+        room.setStatus(RoomStatus.valueOf(roomDTO.getStatus()));
         Room savedRoom = roomRepository.save(room);
         return modelMapper.map(savedRoom, RoomDTO.class);
     }
