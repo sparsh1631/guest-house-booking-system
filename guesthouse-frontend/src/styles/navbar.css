@@ -1,0 +1,121 @@
+.top-navbar {
+  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+  padding: 0.75rem 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  height: 60px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.top-navbar .navbar-brand {
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 12px;
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.user-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  color: white;
+}
+
+.user-avatar i {
+  font-size: 1.2rem;
+}
+
+.user-name-container {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.welcome-text {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.user-name {
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+.logout-btn {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 0.5rem 1.2rem;
+  border-radius: 20px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+.logout-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.logout-btn i {
+  font-size: 1.1rem;
+}
+
+/* Make sure the navbar content stays within bounds */
+.container-fluid {
+  max-width: 1920px;
+  margin: 0 auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .user-info {
+    padding: 4px 8px;
+  }
+  
+  .user-avatar {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .welcome-text {
+    font-size: 0.7rem;
+  }
+  
+  .user-name {
+    font-size: 0.9rem;
+  }
+  
+  .logout-btn {
+    padding: 0.4rem 1rem;
+  }
+  
+  .top-navbar .navbar-brand {
+    font-size: 1.2rem;
+  }
+} 

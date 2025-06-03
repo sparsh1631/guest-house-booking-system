@@ -18,6 +18,8 @@
   color: white;
   padding-top: 20px;
   z-index: 100;
+  padding: 0;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
 .sidebar h5 {
@@ -59,21 +61,32 @@
 
 /* Dashboard container shared by pages */
 .dashboard-container {
-  padding: 20px;
+  min-height: calc(100vh - 56px);
   background-color: #f8f9fa;
 }
 
 /* Dashboard card look */
 .dashboard-card {
-  transition: transform 0.2s ease-in-out;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  cursor: pointer;
+  background-color: white;
   border: none;
-  border-radius: 10px;
-  background-color: #ffffff;
+  border-radius: 8px;
 }
 
 .dashboard-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+}
+
+.dashboard-card .card-title {
+  color: #2c3e50;
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.dashboard-card .card-text {
+  color: #6c757d;
 }
 
 /* Footer */
@@ -84,4 +97,106 @@
   padding: 10px;
   font-size: 14px;
   margin-top: auto;
+}
+
+.content-wrapper {
+  padding: 1.5rem;
+}
+
+.content-header {
+  margin-bottom: 2rem;
+}
+
+.content-header h2 {
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+.content-header p {
+  color: #7f8c8d;
+}
+
+/* Fix select dropdowns */
+.form-select {
+  width: 100%;
+  padding: 0.375rem 0.75rem;
+  background-color: #fff;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+}
+
+/* Card styling */
+.card {
+  border: none;
+  border-radius: 0.5rem;
+  background-color: #fff;
+}
+
+.card-body {
+  background-color: #fff;
+}
+
+/* Form controls */
+.form-control, .form-select {
+  border-radius: 0.25rem;
+}
+
+.form-control:focus, .form-select:focus {
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+  border-color: #80bdff;
+}
+
+/* Container fluid override */
+.container-fluid {
+  padding-right: 0;
+  padding-left: 0;
+  overflow-x: hidden;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .content-wrapper {
+    padding: 1rem;
+  }
+}
+
+/* Fix any potential horizontal scroll */
+body {
+  overflow-x: hidden;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+/* Table styles */
+.table-responsive {
+  border-radius: 8px;
+  background-color: white;
+}
+
+.table {
+  margin-bottom: 0;
+}
+
+.table th {
+  border-top: none;
+  background-color: #f8f9fa;
+  color: #495057;
+  font-weight: 600;
+}
+
+.table td {
+  vertical-align: middle;
+}
+
+/* Badge styles */
+.badge {
+  padding: 0.5em 0.75em;
+  font-weight: 500;
+}
+
+/* Card shadow */
+.shadow-sm {
+  box-shadow: 0 .125rem .25rem rgba(0,0,0,.075)!important;
 }

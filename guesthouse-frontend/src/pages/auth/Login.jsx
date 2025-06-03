@@ -37,19 +37,30 @@ const Login = () => {
     if (!validate()) return;
 
     try {
+      // Login request
       const res = await axios.post('http://localhost:8080/api/auth/login', formData);
       const token = res.data.token;
       localStorage.setItem('token', token);
+      localStorage.setItem('userEmail', formData.email);
 
-      // Fetch role using token
+      // Fetch user info using token
       const userInfoRes = await axios.get('http://localhost:8080/api/auth/userinfo', {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      const role = userInfoRes.data.role;
-      role === 'ADMIN' ? navigate('/admin/dashboard') : navigate('/user/booking');
+      const { role, id, name, firstName, lastName } = userInfoRes.data;
+      
+      // Store user information
+      localStorage.setItem('userId', id);
+      // Use name if available, otherwise construct from firstName and lastName
+      const displayName = name || `${firstName || ''} ${lastName || ''}`.trim();
+      localStorage.setItem('userName', displayName || formData.email.split('@')[0]);
+
+      // Navigate based on role
+      role === 'ADMIN' ? navigate('/admin/dashboard') : navigate('/user/dashboard');
     } catch (err) {
-      setServerError(err.response?.data?.message || 'Login failed');
+      console.error('Login error:', err);
+      setServerError(err.response?.data?.message || 'Login failed. Please try again.');
     }
   };
 
