@@ -1,6 +1,7 @@
 package com.guesthouse.model.entity;
 
 import com.guesthouse.model.enums1.BedStatus;
+import com.guesthouse.model.enums1.BedType;
 import jakarta.persistence.*;
 
 @Entity
@@ -12,6 +13,13 @@ public class Bed {
 
     @Column(nullable = false)
     private String bedNumber;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private BedType type;
+
+    @Column(nullable = false)
+    private Integer count;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -38,6 +46,22 @@ public class Bed {
 
     public void setBedNumber(String bedNumber) {
         this.bedNumber = bedNumber;
+    }
+
+    public BedType getType() {
+        return type;
+    }
+
+    public void setType(BedType type) {
+        this.type = type;
+    }
+
+    public Integer getCount() {
+        return count;
+    }
+
+    public void setCount(Integer count) {
+        this.count = count;
     }
 
     public BedStatus getStatus() {

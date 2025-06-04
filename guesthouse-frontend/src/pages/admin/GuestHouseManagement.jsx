@@ -15,13 +15,15 @@ const GuestHouseManagement = () => {
   const [formData, setFormData] = useState({
     name: '',
     location: '',
-    totalRooms: 0,
-    totalBeds: 0,
-    status: GUEST_HOUSE_STATUS.ACTIVE
+    description: '',
+    isActive: true
   });
 
   useEffect(() => {
     fetchGuestHouses();
+    // Refresh data every 30 seconds
+    const interval = setInterval(fetchGuestHouses, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const fetchGuestHouses = async () => {
@@ -29,15 +31,26 @@ const GuestHouseManagement = () => {
       setLoading(true);
       setError(null);
       const response = await guestHouseAPI.getAll();
-      // Ensure we always have an array
+      // Process the response to include room calculations
       const data = Array.isArray(response?.data) ? response.data : 
                   Array.isArray(response) ? response : [];
-      setGuestHouses(data);
+                  
+      // Calculate room statistics for each guest house
+      const processedData = data.map(house => ({
+        ...house,
+        totalRooms: house.rooms?.length || 0,
+        totalBeds: house.rooms?.reduce((total, room) => {
+          // If room has a specific number of beds, use that, otherwise default to 1
+          const beds = room.totalBeds || 1;
+          return total + beds;
+        }, 0) || 0
+      }));
+      
+      setGuestHouses(processedData);
     } catch (error) {
       console.error('Error fetching guest houses:', error);
       setError('Failed to load guest houses. Please try again later.');
       toast.error('Failed to load guest houses');
-      // Set empty array on error
       setGuestHouses([]);
     } finally {
       setLoading(false);
@@ -50,9 +63,8 @@ const GuestHouseManagement = () => {
     setFormData({
       name: '',
       location: '',
-      totalRooms: 0,
-      totalBeds: 0,
-      status: GUEST_HOUSE_STATUS.ACTIVE
+      description: '',
+      isActive: true
     });
   };
 
@@ -62,9 +74,8 @@ const GuestHouseManagement = () => {
       setFormData({
         name: guestHouse.name,
         location: guestHouse.location,
-        totalRooms: guestHouse.totalRooms,
-        totalBeds: guestHouse.totalBeds,
-        status: guestHouse.status
+        description: guestHouse.description || '',
+        isActive: guestHouse.isActive
       });
     }
     setShowModal(true);
@@ -156,21 +167,21 @@ const GuestHouseManagement = () => {
               </thead>
               <tbody>
                 {guestHouses.map((house) => (
-                  <tr key={house._id}>
+                  <tr key={house._id || house.id}>
                     <td>{house.name}</td>
                     <td>{house.location}</td>
                     <td>{house.totalRooms}</td>
                     <td>{house.totalBeds}</td>
                     <td>
-                      <span className={`badge bg-${house.status === GUEST_HOUSE_STATUS.ACTIVE ? 'success' : 'danger'}`}>
-                        {house.status}
+                      <span className={`badge bg-${house.isActive ? 'success' : 'danger'}`}>
+                        {house.isActive ? 'Active' : 'Inactive'}
                       </span>
                     </td>
                     <td>
                       <Button variant="outline-primary" size="sm" className="me-2" onClick={() => handleShow(house)}>
                         <FaEdit />
                       </Button>
-                      <Button variant="outline-danger" size="sm" onClick={() => handleDelete(house._id)}>
+                      <Button variant="outline-danger" size="sm" onClick={() => handleDelete(house._id || house.id)}>
                         <FaTrash />
                       </Button>
                     </td>
@@ -212,40 +223,23 @@ const GuestHouseManagement = () => {
                 </Form.Group>
               </Col>
             </Row>
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Total Rooms</Form.Label>
-                  <Form.Control
-                    type="number"
-                    value={formData.totalRooms}
-                    onChange={(e) => setFormData({ ...formData, totalRooms: parseInt(e.target.value) })}
-                    required
-                    min="0"
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Total Beds</Form.Label>
-                  <Form.Control
-                    type="number"
-                    value={formData.totalBeds}
-                    onChange={(e) => setFormData({ ...formData, totalBeds: parseInt(e.target.value) })}
-                    required
-                    min="0"
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
+            <Form.Group className="mb-3">
+              <Form.Label>Description</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              />
+            </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Status</Form.Label>
               <Form.Select
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                value={formData.isActive}
+                onChange={(e) => setFormData({ ...formData, isActive: e.target.value === 'true' })}
               >
-                <option value={GUEST_HOUSE_STATUS.ACTIVE}>Active</option>
-                <option value={GUEST_HOUSE_STATUS.INACTIVE}>Inactive</option>
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
               </Form.Select>
             </Form.Group>
           </Modal.Body>

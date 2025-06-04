@@ -36,4 +36,8 @@ public interface AdminService {
     BookingResponseDTO rejectBooking(Long id, String reason);
     BookingResponseDTO cancelBooking(Long id, String reason);
     List<BookingResponseDTO> getBookingsByGuestHouse(Long guestHouseId);
+
+    // New methods for guest houses with rooms
+    List<GuestHouseWithRoomsDTO> getAllGuestHousesWithRooms();
+    GuestHouseWithRoomsDTO getGuestHouseWithRooms(Long id);
 }

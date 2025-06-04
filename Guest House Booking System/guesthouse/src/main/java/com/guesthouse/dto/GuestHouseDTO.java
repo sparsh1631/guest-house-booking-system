@@ -13,7 +13,7 @@ public class GuestHouseDTO {
 
     @NotBlank(message = "Location is required")
     private String location;
-
+    
     private String description;
 
     @NotNull(message = "Active status is required")

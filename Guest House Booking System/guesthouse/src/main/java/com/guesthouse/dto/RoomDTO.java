@@ -4,6 +4,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class RoomDTO {
     private Long id;
 
@@ -22,6 +25,8 @@ public class RoomDTO {
 
     @NotNull(message = "Room status is required")
     private String status;
+
+    private List<BedDTO> beds = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -69,5 +74,13 @@ public class RoomDTO {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public List<BedDTO> getBeds() {
+        return beds;
+    }
+
+    public void setBeds(List<BedDTO> beds) {
+        this.beds = beds != null ? beds : new ArrayList<>();
     }
 }
