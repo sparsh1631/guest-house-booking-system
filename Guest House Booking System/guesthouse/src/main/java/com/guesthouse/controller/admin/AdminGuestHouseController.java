@@ -3,6 +3,7 @@ package com.guesthouse.controller.admin;
 import com.guesthouse.dto.GuestHouseDTO;
 import com.guesthouse.dto.RoomDTO;
 import com.guesthouse.dto.BedDTO;
+import com.guesthouse.dto.GuestHouseWithRoomsDTO;
 import com.guesthouse.service.AdminService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,12 @@ public class AdminGuestHouseController {
     }
 
     // Guest House Endpoints
+
+    @GetMapping("/with-rooms")
+    public ResponseEntity<List<GuestHouseWithRoomsDTO>> getAllGuestHousesWithRooms() {
+        List<GuestHouseWithRoomsDTO> guestHouses = adminService.getAllGuestHousesWithRooms();
+        return ResponseEntity.ok(guestHouses);
+    }
 
     @PostMapping
     public ResponseEntity<GuestHouseDTO> createGuestHouse(

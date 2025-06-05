@@ -9,7 +9,7 @@ const handleResponse = (response) => {
 // Guest House API calls
 export const guestHouseAPI = {
   getAll: async () => {
-    const response = await axiosInstance.get('/api/admin/guest-houses');
+    const response = await axiosInstance.get('/api/admin/guest-houses/with-rooms');
     return response.data;
   },
   

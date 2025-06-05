@@ -31,22 +31,16 @@ const GuestHouseManagement = () => {
       setLoading(true);
       setError(null);
       const response = await guestHouseAPI.getAll();
-      // Process the response to include room calculations
-      const data = Array.isArray(response?.data) ? response.data : 
-                  Array.isArray(response) ? response : [];
-                  
-      // Calculate room statistics for each guest house
-      const processedData = data.map(house => ({
-        ...house,
-        totalRooms: house.rooms?.length || 0,
-        totalBeds: house.rooms?.reduce((total, room) => {
-          // If room has a specific number of beds, use that, otherwise default to 1
-          const beds = room.totalBeds || 1;
-          return total + beds;
-        }, 0) || 0
+      const guestHouses = Array.isArray(response) ? response : [];
+      
+      // Calculate totals from the rooms data
+      const processedGuestHouses = guestHouses.map(guestHouse => ({
+        ...guestHouse,
+        totalRooms: guestHouse.rooms?.length || 0,
+        totalBeds: guestHouse.rooms?.reduce((total, room) => total + (room.beds?.length || 0), 0) || 0
       }));
       
-      setGuestHouses(processedData);
+      setGuestHouses(processedGuestHouses);
     } catch (error) {
       console.error('Error fetching guest houses:', error);
       setError('Failed to load guest houses. Please try again later.');
