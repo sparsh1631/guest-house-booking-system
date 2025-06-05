@@ -16,10 +16,10 @@ export const isDateValid = (date) => {
 
 // Currency formatting
 export const formatCurrency = (amount) => {
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR'
-  }).format(amount);
+  if (amount === undefined || amount === null || isNaN(amount)) {
+    return '₹0';
+  }
+  return `₹${Number(amount).toLocaleString('en-IN')}`;
 };
 
 // String helpers

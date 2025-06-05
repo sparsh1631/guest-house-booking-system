@@ -38,7 +38,8 @@ export const guestHouseAPI = {
 export const roomAPI = {
   getAll: async () => {
     const response = await axiosInstance.get('/api/admin/rooms');
-    return handleResponse(response);
+    const data = response.data;
+    return Array.isArray(data) ? data : [];
   },
   
   getById: async (id) => {
@@ -63,7 +64,8 @@ export const roomAPI = {
 
   getByGuestHouse: async (guestHouseId) => {
     const response = await axiosInstance.get(`/api/admin/guest-houses/${guestHouseId}/rooms`);
-    return handleResponse(response);
+    const data = response.data;
+    return Array.isArray(data) ? data : [];
   }
 };
 

@@ -35,14 +35,20 @@ const RoomManagement = () => {
         roomAPI.getAll(),
         guestHouseAPI.getAll()
       ]);
-      // Ensure we always have arrays
-      setRooms(Array.isArray(roomsResponse) ? roomsResponse : []);
+      
+      // Process rooms data
+      const processedRooms = Array.isArray(roomsResponse) ? roomsResponse.map(room => ({
+        ...room,
+        price: Number(room.price || 0),
+        totalBeds: Number(room.totalBeds || room.beds?.length || 0)
+      })) : [];
+      
+      setRooms(processedRooms);
       setGuestHouses(Array.isArray(guestHousesResponse) ? guestHousesResponse : []);
     } catch (error) {
       console.error('Error fetching data:', error);
       setError('Failed to load rooms and guest houses. Please try again later.');
       toast.error('Failed to load data');
-      // Set empty arrays on error
       setRooms([]);
       setGuestHouses([]);
     } finally {
@@ -110,8 +116,8 @@ const RoomManagement = () => {
   };
 
   const getGuestHouseName = (id) => {
-    if (!Array.isArray(guestHouses)) return 'Unknown';
-    const guestHouse = guestHouses.find(gh => gh && gh._id === id);
+    if (!id || !Array.isArray(guestHouses)) return 'Unknown';
+    const guestHouse = guestHouses.find(gh => gh && (gh.id === id || gh._id === id));
     return guestHouse ? guestHouse.name : 'Unknown';
   };
 
@@ -171,12 +177,12 @@ const RoomManagement = () => {
               </thead>
               <tbody>
                 {rooms.map((room) => (
-                  <tr key={room._id}>
+                  <tr key={room._id || room.id}>
                     <td>{getGuestHouseName(room.guestHouseId)}</td>
                     <td>{room.roomNumber}</td>
                     <td className="text-capitalize">{room.type}</td>
-                    <td>{room.totalBeds}</td>
-                    <td>{formatCurrency(room.pricePerNight)}</td>
+                    <td>{room.totalBeds || room.beds?.length || 0}</td>
+                    <td>{formatCurrency(room.price || room.pricePerNight)}</td>
                     <td>
                       <span className={`badge bg-${room.status === ROOM_STATUS.AVAILABLE ? 'success' : 'warning'}`}>
                         {room.status}
@@ -186,7 +192,7 @@ const RoomManagement = () => {
                       <Button variant="outline-primary" size="sm" className="me-2" onClick={() => handleShow(room)}>
                         <FaEdit />
                       </Button>
-                      <Button variant="outline-danger" size="sm" onClick={() => handleDelete(room._id)}>
+                      <Button variant="outline-danger" size="sm" onClick={() => handleDelete(room._id || room.id)}>
                         <FaTrash />
                       </Button>
                     </td>
