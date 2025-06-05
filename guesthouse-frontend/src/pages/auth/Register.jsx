@@ -6,8 +6,7 @@ import '../../styles/auth.css';
 const Register = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    username: '',
     email: '',
     password: '',
     confirmPassword: ''
@@ -18,12 +17,8 @@ const Register = () => {
   const validate = () => {
     const newErrors = {};
     
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = 'First name is required';
-    }
-    
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = 'Last name is required';
+    if (!formData.username.trim()) {
+      newErrors.username = 'Username is required';
     }
     
     if (!formData.email.trim()) {
@@ -34,8 +29,10 @@ const Register = () => {
     
     if (!formData.password) {
       newErrors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters';
+    } else if (!/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).+$/.test(formData.password)) {
+      newErrors.password = 'Password must contain at least one uppercase letter, one lowercase letter, and one digit';
     }
     
     if (!formData.confirmPassword) {
@@ -59,8 +56,7 @@ const Register = () => {
 
     try {
       const response = await axios.post('http://localhost:8080/api/auth/register', {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
+        username: formData.username,
         email: formData.email,
         password: formData.password
       });
@@ -83,29 +79,16 @@ const Register = () => {
         
         <form onSubmit={handleSubmit} noValidate>
           <div className="mb-3">
-            <label className="form-label">First Name</label>
+            <label className="form-label">Username</label>
             <input
               type="text"
-              name="firstName"
-              className={`form-control ${errors.firstName ? 'is-invalid' : ''}`}
-              value={formData.firstName}
+              name="username"
+              className={`form-control ${errors.username ? 'is-invalid' : ''}`}
+              value={formData.username}
               onChange={handleChange}
-              placeholder="Enter your first name"
+              placeholder="Enter your username"
             />
-            {errors.firstName && <div className="invalid-feedback">{errors.firstName}</div>}
-          </div>
-
-          <div className="mb-3">
-            <label className="form-label">Last Name</label>
-            <input
-              type="text"
-              name="lastName"
-              className={`form-control ${errors.lastName ? 'is-invalid' : ''}`}
-              value={formData.lastName}
-              onChange={handleChange}
-              placeholder="Enter your last name"
-            />
-            {errors.lastName && <div className="invalid-feedback">{errors.lastName}</div>}
+            {errors.username && <div className="invalid-feedback">{errors.username}</div>}
           </div>
 
           <div className="mb-3">

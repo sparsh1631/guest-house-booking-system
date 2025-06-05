@@ -102,7 +102,7 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public GuestHouseWithRoomsDTO getGuestHouseWithRooms(Long id) {
         GuestHouse guestHouse = guestHouseRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Guest House not found"));
+                .orElseThrow(() -> new  ResourceNotFoundException("Guest House not found"));
         
         GuestHouseWithRoomsDTO dto = modelMapper.map(guestHouse, GuestHouseWithRoomsDTO.class);
         List<Room> rooms = roomRepository.findByGuestHouseId(id);
