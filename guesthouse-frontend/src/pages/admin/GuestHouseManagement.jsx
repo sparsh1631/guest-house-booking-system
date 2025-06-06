@@ -66,7 +66,13 @@ const GuestHouseManagement = () => {
         location: guestHouse.location,
         description: guestHouse.description || '',
         isActive: guestHouse.isActive,
-        rooms: guestHouse.rooms || []
+        rooms: (guestHouse.rooms || []).map(room => ({
+          roomNumber: room.roomNumber,
+          type: room.type,
+          price: room.price.toString(),
+          status: room.status,
+          beds: room.beds || []
+        }))
       });
     }
     setShowModal(true);
@@ -78,8 +84,15 @@ const GuestHouseManagement = () => {
       const dataToSubmit = {
         ...formData,
         rooms: formData.rooms.map(room => ({
-          ...room,
-          beds: room.beds || []
+          roomNumber: room.roomNumber,
+          type: room.type,
+          price: parseFloat(room.price),
+          status: room.status,
+          beds: (room.beds || []).map(bed => ({
+            bedNumber: bed.bedNumber,
+            type: bed.type,
+            status: bed.status || 'AVAILABLE'
+          }))
         }))
       };
 
@@ -104,8 +117,7 @@ const GuestHouseManagement = () => {
       type: 'STANDARD',
       price: '0',
       status: 'AVAILABLE',
-      beds: [],
-      guestHouseId: editingId
+      beds: []
     };
     setFormData({
       ...formData,
@@ -140,10 +152,13 @@ const GuestHouseManagement = () => {
       type: 'SINGLE',
       status: 'AVAILABLE'
     };
-    updatedRooms[roomIndex] = {
-      ...updatedRooms[roomIndex],
-      beds: [...(updatedRooms[roomIndex].beds || []), newBed]
-    };
+    
+    // Initialize beds array if it doesn't exist
+    if (!updatedRooms[roomIndex].beds) {
+      updatedRooms[roomIndex].beds = [];
+    }
+    
+    updatedRooms[roomIndex].beds.push(newBed);
     setFormData({
       ...formData,
       rooms: updatedRooms
@@ -152,14 +167,12 @@ const GuestHouseManagement = () => {
 
   const handleUpdateBed = (roomIndex, bedIndex, field, value) => {
     const updatedRooms = [...formData.rooms];
-    const updatedBeds = [...(updatedRooms[roomIndex].beds || [])];
-    updatedBeds[bedIndex] = {
-      ...updatedBeds[bedIndex],
+    if (!updatedRooms[roomIndex].beds) {
+      updatedRooms[roomIndex].beds = [];
+    }
+    updatedRooms[roomIndex].beds[bedIndex] = {
+      ...updatedRooms[roomIndex].beds[bedIndex],
       [field]: value
-    };
-    updatedRooms[roomIndex] = {
-      ...updatedRooms[roomIndex],
-      beds: updatedBeds
     };
     setFormData({
       ...formData,
@@ -169,11 +182,9 @@ const GuestHouseManagement = () => {
 
   const handleDeleteBed = (roomIndex, bedIndex) => {
     const updatedRooms = [...formData.rooms];
-    const updatedBeds = updatedRooms[roomIndex].beds.filter((_, i) => i !== bedIndex);
-    updatedRooms[roomIndex] = {
-      ...updatedRooms[roomIndex],
-      beds: updatedBeds
-    };
+    if (updatedRooms[roomIndex].beds) {
+      updatedRooms[roomIndex].beds = updatedRooms[roomIndex].beds.filter((_, i) => i !== bedIndex);
+    }
     setFormData({
       ...formData,
       rooms: updatedRooms
@@ -396,26 +407,24 @@ const GuestHouseManagement = () => {
                         <FaTrash />
                       </Button>
                     </div>
-                    <div className="card-body">
-                      <Row className="mb-3">
+                    <div className="room-body">
+                      <Row>
                         <Col md={6}>
-                          <Form.Group>
+                          <Form.Group className="mb-3">
                             <Form.Label>Room Number</Form.Label>
                             <Form.Control
                               type="text"
-                              size="sm"
-                              value={room.roomNumber}
+                              value={room.roomNumber || ''}
                               onChange={(e) => handleUpdateRoom(roomIndex, 'roomNumber', e.target.value)}
                               required
                             />
                           </Form.Group>
                         </Col>
                         <Col md={6}>
-                          <Form.Group>
-                            <Form.Label>Type</Form.Label>
+                          <Form.Group className="mb-3">
+                            <Form.Label>Room Type</Form.Label>
                             <Form.Select
-                              size="sm"
-                              value={room.type}
+                              value={room.type || 'STANDARD'}
                               onChange={(e) => handleUpdateRoom(roomIndex, 'type', e.target.value)}
                             >
                               <option value="STANDARD">Standard</option>
@@ -425,8 +434,34 @@ const GuestHouseManagement = () => {
                           </Form.Group>
                         </Col>
                       </Row>
-
-                      <div className="beds-section">
+                      <Row>
+                        <Col md={6}>
+                          <Form.Group className="mb-3">
+                            <Form.Label>Price</Form.Label>
+                            <Form.Control
+                              type="number"
+                              value={room.price || '0'}
+                              onChange={(e) => handleUpdateRoom(roomIndex, 'price', e.target.value)}
+                              required
+                              min="0"
+                            />
+                          </Form.Group>
+                        </Col>
+                        <Col md={6}>
+                          <Form.Group className="mb-3">
+                            <Form.Label>Status</Form.Label>
+                            <Form.Select
+                              value={room.status || 'AVAILABLE'}
+                              onChange={(e) => handleUpdateRoom(roomIndex, 'status', e.target.value)}
+                            >
+                              <option value="AVAILABLE">Available</option>
+                              <option value="OCCUPIED">Occupied</option>
+                              <option value="MAINTENANCE">Maintenance</option>
+                            </Form.Select>
+                          </Form.Group>
+                        </Col>
+                      </Row>
+                      <div className="beds-section mt-3">
                         <div className="d-flex justify-content-between align-items-center mb-2">
                           <Form.Label className="mb-0">Beds</Form.Label>
                           <Button
@@ -454,14 +489,15 @@ const GuestHouseManagement = () => {
                                     <Form.Control
                                       type="text"
                                       size="sm"
-                                      value={bed.bedNumber}
+                                      value={bed.bedNumber || ''}
                                       onChange={(e) => handleUpdateBed(roomIndex, bedIndex, 'bedNumber', e.target.value)}
+                                      required
                                     />
                                   </td>
                                   <td>
                                     <Form.Select
                                       size="sm"
-                                      value={bed.type}
+                                      value={bed.type || 'SINGLE'}
                                       onChange={(e) => handleUpdateBed(roomIndex, bedIndex, 'type', e.target.value)}
                                     >
                                       <option value="SINGLE">Single</option>
