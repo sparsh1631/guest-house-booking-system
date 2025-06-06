@@ -23,8 +23,8 @@ public class UserDetailsServiceImpl1 implements UserDetailsService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
-        // Convert role to authority (without ROLE_ prefix)
-        String authority = user.getRole().name();
+        // Convert role to authority with ROLE_ prefix
+        String authority = "ROLE_" + user.getRole().name();
 
         // Return Spring Security UserDetails object
         return new org.springframework.security.core.userdetails.User(

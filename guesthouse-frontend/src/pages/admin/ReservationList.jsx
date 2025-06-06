@@ -5,7 +5,7 @@ const ReservationList = () => {
   return (
     <Container fluid className="p-4">
       <h2>Reservation List</h2>
-      <p className="text-muted">Coming soon...</p>
+      <p className="text-muted">Loading soon...</p>
     </Container>
   );
 };

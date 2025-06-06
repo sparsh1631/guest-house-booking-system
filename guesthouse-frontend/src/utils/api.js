@@ -1,115 +1,100 @@
-import axiosInstance from './axios';
+import axios from 'axios';
 
-// Helper function to handle API responses
-const handleResponse = (response) => {
-  if (!response || !response.data) return [];
-  return Array.isArray(response.data) ? response.data : [];
-};
+const BASE_URL = 'http://localhost:8080/api';
 
-// Guest House API calls
-export const guestHouseAPI = {
-  getAll: async () => {
-    const response = await axiosInstance.get('/api/admin/guest-houses/with-rooms');
-    return response.data;
+// Create axios instance with base configuration
+const api = axios.create({
+  baseURL: BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
   },
-  
-  getById: async (id) => {
-    const response = await axiosInstance.get(`/api/admin/guest-houses/${id}/with-rooms`);
-    return response.data;
+});
+
+// Add request interceptor to add auth token
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
   },
-  
-  create: async (data) => {
-    const response = await axiosInstance.post('/api/admin/guest-houses', data);
-    return response.data;
-  },
-  
-  update: async (id, data) => {
-    const response = await axiosInstance.put(`/api/admin/guest-houses/${id}`, data);
-    return response.data;
-  },
-  
-  delete: async (id) => {
-    const response = await axiosInstance.delete(`/api/admin/guest-houses/${id}`);
-    return response.data;
+  (error) => {
+    return Promise.reject(error);
   }
-};
+);
 
-// Room API calls
-export const roomAPI = {
-  getAll: async () => {
-    const response = await axiosInstance.get('/api/admin/rooms');
-    const data = response.data;
-    return Array.isArray(data) ? data : [];
-  },
-  
-  getById: async (id) => {
-    const response = await axiosInstance.get(`/api/admin/rooms/${id}`);
-    return response.data;
-  },
-  
-  create: async (data) => {
-    const response = await axiosInstance.post('/api/admin/rooms', data);
-    return response.data;
-  },
-  
-  update: async (id, data) => {
-    const response = await axiosInstance.put(`/api/admin/rooms/${id}`, data);
-    return response.data;
-  },
-  
-  delete: async (id) => {
-    const response = await axiosInstance.delete(`/api/admin/rooms/${id}`);
-    return response.data;
-  },
-
-  getByGuestHouse: async (guestHouseId) => {
-    const response = await axiosInstance.get(`/api/admin/guest-houses/${guestHouseId}/rooms`);
-    const data = response.data;
-    return Array.isArray(data) ? data : [];
+// Add response interceptor for error handling
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
   }
-};
+);
 
-// Booking API calls
-export const bookingAPI = {
-  getAll: async () => {
-    const response = await axiosInstance.get('/api/admin/bookings');
-    return handleResponse(response);
-  },
-  
-  getPending: async () => {
-    const response = await axiosInstance.get('/api/admin/bookings/pending');
-    return handleResponse(response);
-  },
-  
-  approve: async (id) => {
-    const response = await axiosInstance.put(`/api/admin/bookings/${id}/approve`);
-    return response.data;
-  },
-  
-  reject: async (id, reason) => {
-    const response = await axiosInstance.put(`/api/admin/bookings/${id}/reject`, { reason });
-    return response.data;
-  }
+// Auth API calls
+export const authAPI = {
+  login: (credentials) => api.post('/auth/login', credentials),
+  register: (userData) => api.post('/auth/register', userData),
 };
 
 // Dashboard API calls
 export const dashboardAPI = {
-  getStats: async () => {
-    const response = await axiosInstance.get('/api/admin/dashboard-stats');
-    return response.data;
-  },
-  
-  getRevenueStats: async (startDate, endDate) => {
-    const response = await axiosInstance.get('/api/admin/revenue-stats', {
-      params: { startDate, endDate }
-    });
-    return response.data;
-  },
-  
-  getOccupancyStats: async (startDate, endDate) => {
-    const response = await axiosInstance.get('/api/admin/occupancy-stats', {
-      params: { startDate, endDate }
-    });
-    return response.data;
-  }
-}; 
+  getStats: () => api.get('/admin/dashboard/stats'),
+  getRevenueStats: (startDate, endDate) => 
+    api.get('/admin/dashboard/revenue', { params: { startDate, endDate } }),
+  getOccupancyStats: (startDate, endDate) => 
+    api.get('/admin/dashboard/occupancy', { params: { startDate, endDate } })
+};
+
+// Guest House API calls
+export const guestHouseAPI = {
+  getAll: () => api.get('/admin/guest-houses/with-rooms'),
+  getById: (id) => api.get(`/admin/guest-houses/${id}`),
+  create: (data) => api.post('/admin/guest-houses', data),
+  update: (id, data) => api.put(`/admin/guest-houses/${id}`, data),
+  delete: (id) => api.delete(`/admin/guest-houses/${id}`),
+};
+
+// Room API calls
+export const roomAPI = {
+  getAll: () => api.get('/admin/rooms'),
+  getById: (id) => api.get(`/admin/rooms/${id}`),
+  create: (data) => api.post('/admin/rooms', data),
+  update: (id, data) => api.put(`/admin/rooms/${id}`, data),
+  delete: (id) => api.delete(`/admin/rooms/${id}`),
+};
+
+// Bed API calls
+export const bedAPI = {
+  getByRoom: (roomId) => api.get(`/admin/rooms/${roomId}/beds`),
+  create: (data) => api.post('/admin/beds', data),
+  update: (id, data) => api.put(`/admin/beds/${id}`, data),
+  delete: (id) => api.delete(`/admin/beds/${id}`),
+};
+
+// Booking API calls
+export const bookingAPI = {
+  getAll: () => api.get('/admin/bookings'),
+  getById: (id) => api.get(`/admin/bookings/${id}`),
+  create: (data) => api.post('/admin/bookings', data),
+  update: (id, data) => api.put(`/admin/bookings/${id}`, data),
+  delete: (id) => api.delete(`/admin/bookings/${id}`),
+  getPendingRequests: () => api.get('/admin/bookings/pending'),
+  approveBooking: (id) => api.put(`/admin/bookings/${id}/approve`),
+  rejectBooking: (id) => api.put(`/admin/bookings/${id}/reject`),
+};
+
+// User API calls
+export const userAPI = {
+  getAll: () => api.get('/admin/users'),
+  getById: (id) => api.get(`/admin/users/${id}`),
+  update: (id, data) => api.put(`/admin/users/${id}`, data),
+  delete: (id) => api.delete(`/admin/users/${id}`),
+};
+
+export default api; 

@@ -7,10 +7,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.util.Map;
+
 @RestController
-@RequestMapping("/api/admin")
+@RequestMapping("/api/admin/dashboard")
 @PreAuthorize("hasRole('ADMIN')")
-@CrossOrigin(origins = "http://localhost:5173") // Allow requests from your frontend
+@CrossOrigin(origins = "*", maxAge = 3600)
 public class AdminDashboardController {
 
     private final AdminDashboardService dashboardService;
@@ -20,22 +23,25 @@ public class AdminDashboardController {
         this.dashboardService = dashboardService;
     }
 
-    @GetMapping("/dashboard-stats")
-    public ResponseEntity<DashboardStatsDTO> getDashboardStats() {
-        return ResponseEntity.ok(dashboardService.getDashboardStats());
+    @GetMapping("/stats")
+    public ResponseEntity<DashboardStatsDTO> getStats() {
+        DashboardStatsDTO stats = dashboardService.getDashboardStats();
+        return ResponseEntity.ok(stats);
     }
 
-    @GetMapping("/revenue-stats")
-    public ResponseEntity<Object> getRevenueStats(
-            @RequestParam String startDate,
-            @RequestParam String endDate) {
-        return ResponseEntity.ok(dashboardService.getRevenueStats(startDate, endDate));
+    @GetMapping("/revenue")
+    public ResponseEntity<Map<String, Object>> getRevenueStats(
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate) {
+        Map<String, Object> stats = dashboardService.getRevenueStats(startDate, endDate);
+        return ResponseEntity.ok(stats);
     }
 
-    @GetMapping("/occupancy-stats")
-    public ResponseEntity<Object> getOccupancyStats(
-            @RequestParam String startDate,
-            @RequestParam String endDate) {
-        return ResponseEntity.ok(dashboardService.getOccupancyStats(startDate, endDate));
+    @GetMapping("/occupancy")
+    public ResponseEntity<Map<String, Object>> getOccupancyStats(
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate) {
+        Map<String, Object> stats = dashboardService.getOccupancyStats(startDate, endDate);
+        return ResponseEntity.ok(stats);
     }
 } 

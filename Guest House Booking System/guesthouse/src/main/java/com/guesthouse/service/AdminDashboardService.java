@@ -1,9 +1,11 @@
 package com.guesthouse.service;
 
 import com.guesthouse.dto.DashboardStatsDTO;
+import java.time.LocalDate;
+import java.util.Map;
 
 public interface AdminDashboardService {
     DashboardStatsDTO getDashboardStats();
-    Object getRevenueStats(String startDate, String endDate);
-    Object getOccupancyStats(String startDate, String endDate);
+    Map<String, Object> getRevenueStats(LocalDate startDate, LocalDate endDate);
+    Map<String, Object> getOccupancyStats(LocalDate startDate, LocalDate endDate);
 } 

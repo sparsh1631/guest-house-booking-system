@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Container, Row, Col, Card } from 'react-bootstrap';
 import { FaBed, FaHotel, FaUsers, FaClipboardList } from 'react-icons/fa';
 import { dashboardAPI } from '../../utils/api';
@@ -18,26 +18,53 @@ const AdminDashboard = () => {
     totalRevenue: 0,
     totalUsers: 0
   });
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Fetch dashboard statistics
-    const fetchStats = async () => {
-      try {
-        const data = await dashboardAPI.getStats();
-        setStats(data);
-      } catch (error) {
-        console.error('Error fetching dashboard stats:', error);
-        toast.error('Failed to load dashboard statistics');
-      }
-    };
-
-    fetchStats();
-    // Refresh stats every 5 minutes
-    const interval = setInterval(fetchStats, 300000);
-    return () => clearInterval(interval);
+  const fetchStats = useCallback(async () => {
+    try {
+      const response = await dashboardAPI.getStats();
+      const data = response.data || {};
+      
+      setStats({
+        totalGuestHouses: data.totalGuestHouses || 0,
+        totalRooms: data.totalRooms || 0,
+        totalBeds: data.totalBeds || 0,
+        availableRooms: data.availableRooms || 0,
+        occupiedRooms: data.occupiedRooms || 0,
+        totalBookings: data.totalBookings || 0,
+        pendingRequests: data.pendingRequests || 0,
+        totalRevenue: data.totalRevenue || 0,
+        totalUsers: data.totalUsers || 0
+      });
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error);
+      toast.error('Failed to load dashboard statistics');
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const StatCard = ({ title, value, icon, color, onClick }) => (
+  useEffect(() => {
+    fetchStats();
+    // Refresh stats every 30 seconds
+    const interval = setInterval(fetchStats, 30000);
+    return () => clearInterval(interval);
+  }, [fetchStats]);
+
+  const formatNumber = (num) => {
+    return num?.toLocaleString() || '0';
+  };
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(amount || 0);
+  };
+
+  const StatCard = ({ title, value, icon, color, onClick, isCurrency }) => (
     <Card 
       className="mb-4 shadow-sm" 
       style={{ cursor: onClick ? 'pointer' : 'default' }}
@@ -47,7 +74,7 @@ const AdminDashboard = () => {
         <div className="d-flex justify-content-between align-items-center">
           <div>
             <h6 className="text-muted mb-1">{title}</h6>
-            <h3 className="mb-0">{value}</h3>
+            <h3 className="mb-0">{isCurrency ? formatCurrency(value) : formatNumber(value)}</h3>
           </div>
           <div className={`rounded-circle p-3 bg-${color} bg-opacity-10`}>
             {icon}
@@ -56,6 +83,18 @@ const AdminDashboard = () => {
       </Card.Body>
     </Card>
   );
+
+  if (loading) {
+    return (
+      <Container fluid className="p-4">
+        <div className="text-center">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      </Container>
+    );
+  }
 
   return (
     <Container fluid className="p-4">
@@ -114,7 +153,7 @@ const AdminDashboard = () => {
             value={stats.totalBookings}
             icon={<FaClipboardList size={24} className="text-primary" />}
             color="primary"
-            onClick={() => navigate('/admin/reservation-list')}
+            onClick={() => navigate('/admin/bookings')}
           />
         </Col>
         <Col lg={3} sm={6}>
@@ -141,7 +180,7 @@ const AdminDashboard = () => {
           <Card className="shadow-sm">
             <Card.Body>
               <h5 className="mb-4">Total Revenue</h5>
-              <h2 className="mb-0">₹{stats.totalRevenue?.toLocaleString() || 0}</h2>
+              <h2 className="mb-0">{formatCurrency(stats.totalRevenue)}</h2>
             </Card.Body>
           </Card>
         </Col>

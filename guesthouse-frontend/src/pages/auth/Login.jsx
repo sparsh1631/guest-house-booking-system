@@ -44,9 +44,6 @@ const Login = () => {
       console.log('Login response:', res.data);
       const token = res.data.token;
       
-      // Store token
-      localStorage.setItem('token', token);
-
       // Fetch user info using token
       console.log('Fetching user info with token:', token);
       const userInfoRes = await axios.get('http://localhost:8080/api/auth/userinfo', {
@@ -54,12 +51,12 @@ const Login = () => {
       });
       console.log('User info response:', userInfoRes.data);
 
-      // The role is directly in userInfoRes.data.token
+      // The role is in userInfoRes.data.token
       const role = userInfoRes.data.token;
       console.log('User role:', role);
       
       // Store user information
-      localStorage.setItem('userId', formData.email);
+      localStorage.setItem('token', token);
       localStorage.setItem('userRole', role);
       localStorage.setItem('userEmail', formData.email);
       localStorage.setItem('userName', formData.email.split('@')[0]);
@@ -68,10 +65,10 @@ const Login = () => {
       console.log('Navigating based on role:', role);
       if (role === 'ADMIN') {
         console.log('Redirecting to admin dashboard');
-        navigate('/admin/dashboard', { replace: true });
+        navigate('/admin/dashboard');
       } else {
         console.log('Redirecting to user dashboard');
-        navigate('/user/dashboard', { replace: true });
+        navigate('/user/dashboard');
       }
 
       // Force a page reload to ensure clean state

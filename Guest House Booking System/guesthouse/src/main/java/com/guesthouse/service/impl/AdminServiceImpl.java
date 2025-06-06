@@ -48,8 +48,36 @@ public class AdminServiceImpl implements AdminService {
         if (guestHouse.getIsActive() == null) {
             guestHouse.setIsActive(true);
         }
+        
+        // Save the guest house first
         GuestHouse savedGuestHouse = guestHouseRepository.save(guestHouse);
-        return modelMapper.map(savedGuestHouse, GuestHouseDTO.class);
+        
+        // Handle rooms and beds if they exist
+        if (guestHouseDTO.getRooms() != null) {
+            for (RoomDTO roomDTO : guestHouseDTO.getRooms()) {
+                Room room = modelMapper.map(roomDTO, Room.class);
+                room.setGuestHouse(savedGuestHouse);
+                Room savedRoom = roomRepository.save(room);
+                
+                // Handle beds if they exist
+                if (roomDTO.getBeds() != null) {
+                    for (BedDTO bedDTO : roomDTO.getBeds()) {
+                        Bed bed = modelMapper.map(bedDTO, Bed.class);
+                        bed.setRoom(savedRoom);
+                        bedRepository.save(bed);
+                    }
+                }
+            }
+        }
+        
+        // Refresh the guest house to get the updated data with rooms and beds
+        GuestHouse refreshedGuestHouse = guestHouseRepository.findById(savedGuestHouse.getId()).get();
+        GuestHouseDTO resultDTO = modelMapper.map(refreshedGuestHouse, GuestHouseDTO.class);
+        resultDTO.setTotalRooms(refreshedGuestHouse.getRooms().size());
+        resultDTO.setTotalBeds(refreshedGuestHouse.getRooms().stream()
+                .mapToInt(room -> room.getBeds().size())
+                .sum());
+        return resultDTO;
     }
 
     @Override
@@ -57,9 +85,75 @@ public class AdminServiceImpl implements AdminService {
     public GuestHouseDTO updateGuestHouse(Long id, GuestHouseDTO guestHouseDTO) {
         GuestHouse existingGuestHouse = guestHouseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Guest house not found"));
-        modelMapper.map(guestHouseDTO, existingGuestHouse);
+
+        // Update basic properties
+        existingGuestHouse.setName(guestHouseDTO.getName());
+        existingGuestHouse.setLocation(guestHouseDTO.getLocation());
+        existingGuestHouse.setDescription(guestHouseDTO.getDescription());
+        existingGuestHouse.setIsActive(guestHouseDTO.getIsActive());
+
+        // Handle rooms
+        if (guestHouseDTO.getRooms() != null) {
+            // Remove rooms that are not in the updated list
+            existingGuestHouse.getRooms().removeIf(room -> 
+                guestHouseDTO.getRooms().stream()
+                    .noneMatch(roomDTO -> roomDTO.getId() != null && roomDTO.getId().equals(room.getId()))
+            );
+
+            // Update existing rooms and add new ones
+            for (RoomDTO roomDTO : guestHouseDTO.getRooms()) {
+                if (roomDTO.getId() != null) {
+                    // Update existing room
+                    Room existingRoom = roomRepository.findById(roomDTO.getId())
+                            .orElseThrow(() -> new ResourceNotFoundException("Room not found"));
+                    modelMapper.map(roomDTO, existingRoom);
+                    
+                    // Handle beds for existing room
+                    if (roomDTO.getBeds() != null) {
+                        existingRoom.getBeds().removeIf(bed ->
+                            roomDTO.getBeds().stream()
+                                .noneMatch(bedDTO -> bedDTO.getId() != null && bedDTO.getId().equals(bed.getId()))
+                        );
+
+                        for (BedDTO bedDTO : roomDTO.getBeds()) {
+                            if (bedDTO.getId() != null) {
+                                // Update existing bed
+                                Bed existingBed = bedRepository.findById(bedDTO.getId())
+                                        .orElseThrow(() -> new ResourceNotFoundException("Bed not found"));
+                                modelMapper.map(bedDTO, existingBed);
+                            } else {
+                                // Add new bed
+                                Bed newBed = modelMapper.map(bedDTO, Bed.class);
+                                newBed.setRoom(existingRoom);
+                                existingRoom.getBeds().add(newBed);
+                            }
+                        }
+                    }
+                } else {
+                    // Add new room
+                    Room newRoom = modelMapper.map(roomDTO, Room.class);
+                    newRoom.setGuestHouse(existingGuestHouse);
+                    Room savedRoom = roomRepository.save(newRoom);
+
+                    // Handle beds for new room
+                    if (roomDTO.getBeds() != null) {
+                        for (BedDTO bedDTO : roomDTO.getBeds()) {
+                            Bed newBed = modelMapper.map(bedDTO, Bed.class);
+                            newBed.setRoom(savedRoom);
+                            bedRepository.save(newBed);
+                        }
+                    }
+                }
+            }
+        }
+
         GuestHouse updatedGuestHouse = guestHouseRepository.save(existingGuestHouse);
-        return modelMapper.map(updatedGuestHouse, GuestHouseDTO.class);
+        GuestHouseDTO resultDTO = modelMapper.map(updatedGuestHouse, GuestHouseDTO.class);
+        resultDTO.setTotalRooms(updatedGuestHouse.getRooms().size());
+        resultDTO.setTotalBeds(updatedGuestHouse.getRooms().stream()
+                .mapToInt(room -> room.getBeds().size())
+                .sum());
+        return resultDTO;
     }
 
     @Override
@@ -132,8 +226,8 @@ public class AdminServiceImpl implements AdminService {
                                 BedDTO bedDTO = new BedDTO();
                                 bedDTO.setId(bed.getId());
                                 bedDTO.setType(bed.getType().toString());
-                                bedDTO.setCount(bed.getCount());
                                 bedDTO.setStatus(bed.getStatus().toString());
+                                bedDTO.setRoomId(room.getId());
                                 return bedDTO;
                             })
                             .collect(Collectors.toList());
@@ -172,8 +266,7 @@ public class AdminServiceImpl implements AdminService {
             for (BedDTO bedDTO : roomDTO.getBeds()) {
                 Bed bed = new Bed();
                 bed.setType(BedType.valueOf(bedDTO.getType()));
-                bed.setCount(bedDTO.getCount());
-                bed.setStatus(BedStatus.AVAILABLE);
+                bed.setStatus(BedStatus.valueOf(bedDTO.getStatus()));
                 bed.setRoom(savedRoom);
                 bedRepository.save(bed);
             }
@@ -211,8 +304,7 @@ public class AdminServiceImpl implements AdminService {
             for (BedDTO bedDTO : roomDTO.getBeds()) {
                 Bed bed = new Bed();
                 bed.setType(BedType.valueOf(bedDTO.getType()));
-                bed.setCount(bedDTO.getCount());
-                bed.setStatus(BedStatus.AVAILABLE);
+                bed.setStatus(BedStatus.valueOf(bedDTO.getStatus()));
                 bed.setRoom(existingRoom);
                 existingRoom.addBed(bed);
             }

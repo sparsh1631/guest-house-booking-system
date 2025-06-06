@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface GuestHouseRepository extends JpaRepository<GuestHouse, Long> {
     List<GuestHouse> findByIsActive(boolean isActive);
+    Long countByIsActiveTrue();
 }

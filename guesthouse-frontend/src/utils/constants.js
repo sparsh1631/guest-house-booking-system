@@ -1,5 +1,5 @@
 // API Base URL
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5173/api';
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 // User Roles
 export const ROLES = {
@@ -29,11 +29,11 @@ export const GUEST_HOUSE_STATUS = {
 
 // Booking Status
 export const BOOKING_STATUS = {
-  PENDING: 'pending',
-  APPROVED: 'approved',
-  REJECTED: 'rejected',
-  CANCELLED: 'cancelled',
-  COMPLETED: 'completed'
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+  CANCELLED: 'CANCELLED',
+  COMPLETED: 'COMPLETED'
 };
 
 // Pagination

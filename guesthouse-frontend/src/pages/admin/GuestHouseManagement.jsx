@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Card, Table, Button, Modal, Form, Row, Col, Alert, Spinner } from 'react-bootstrap';
-import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
-import { guestHouseAPI } from '../../utils/api';
-import { GUEST_HOUSE_STATUS } from '../../utils/constants';
+import { Container, Card, Button, Modal, Form, Row, Col, Badge, Spinner, Nav, Table } from 'react-bootstrap';
+import { FaEdit, FaTrash, FaPlus, FaBed, FaMapMarkerAlt, FaHotel } from 'react-icons/fa';
+import { guestHouseAPI, bedAPI, roomAPI } from '../../utils/api';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import './GuestHouseManagement.css';
 
 const GuestHouseManagement = () => {
   const [guestHouses, setGuestHouses] = useState([]);
@@ -12,11 +12,13 @@ const GuestHouseManagement = () => {
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState('basic');
   const [formData, setFormData] = useState({
     name: '',
     location: '',
     description: '',
-    isActive: true
+    isActive: true,
+    rooms: []
   });
 
   useEffect(() => {
@@ -31,16 +33,8 @@ const GuestHouseManagement = () => {
       setLoading(true);
       setError(null);
       const response = await guestHouseAPI.getAll();
-      const guestHouses = Array.isArray(response) ? response : [];
-      
-      // Calculate totals from the rooms data
-      const processedGuestHouses = guestHouses.map(guestHouse => ({
-        ...guestHouse,
-        totalRooms: guestHouse.rooms?.length || 0,
-        totalBeds: guestHouse.rooms?.reduce((total, room) => total + (room.beds?.length || 0), 0) || 0
-      }));
-      
-      setGuestHouses(processedGuestHouses);
+      const guestHouses = response.data || [];
+      setGuestHouses(guestHouses);
     } catch (error) {
       console.error('Error fetching guest houses:', error);
       setError('Failed to load guest houses. Please try again later.');
@@ -54,22 +48,25 @@ const GuestHouseManagement = () => {
   const handleClose = () => {
     setShowModal(false);
     setEditingId(null);
+    setActiveTab('basic');
     setFormData({
       name: '',
       location: '',
       description: '',
-      isActive: true
+      isActive: true,
+      rooms: []
     });
   };
 
   const handleShow = (guestHouse = null) => {
     if (guestHouse) {
-      setEditingId(guestHouse._id);
+      setEditingId(guestHouse.id);
       setFormData({
         name: guestHouse.name,
         location: guestHouse.location,
         description: guestHouse.description || '',
-        isActive: guestHouse.isActive
+        isActive: guestHouse.isActive,
+        rooms: guestHouse.rooms || []
       });
     }
     setShowModal(true);
@@ -78,11 +75,19 @@ const GuestHouseManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const dataToSubmit = {
+        ...formData,
+        rooms: formData.rooms.map(room => ({
+          ...room,
+          beds: room.beds || []
+        }))
+      };
+
       if (editingId) {
-        await guestHouseAPI.update(editingId, formData);
+        await guestHouseAPI.update(editingId, dataToSubmit);
         toast.success('Guest house updated successfully');
       } else {
-        await guestHouseAPI.create(formData);
+        await guestHouseAPI.create(dataToSubmit);
         toast.success('Guest house created successfully');
       }
       handleClose();
@@ -93,25 +98,109 @@ const GuestHouseManagement = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this guest house?')) {
-      try {
-        await guestHouseAPI.delete(id);
-        toast.success('Guest house deleted successfully');
-        fetchGuestHouses();
-      } catch (error) {
-        console.error('Error deleting guest house:', error);
-        toast.error(error.response?.data?.message || 'Failed to delete guest house');
-      }
+  const handleAddRoom = () => {
+    const newRoom = {
+      roomNumber: '',
+      type: 'STANDARD',
+      price: '0',
+      status: 'AVAILABLE',
+      beds: [],
+      guestHouseId: editingId
+    };
+    setFormData({
+      ...formData,
+      rooms: [...formData.rooms, newRoom]
+    });
+  };
+
+  const handleUpdateRoom = (index, field, value) => {
+    const updatedRooms = [...formData.rooms];
+    updatedRooms[index] = {
+      ...updatedRooms[index],
+      [field]: value
+    };
+    setFormData({
+      ...formData,
+      rooms: updatedRooms
+    });
+  };
+
+  const handleDeleteRoom = (index) => {
+    const updatedRooms = formData.rooms.filter((_, i) => i !== index);
+    setFormData({
+      ...formData,
+      rooms: updatedRooms
+    });
+  };
+
+  const handleAddBed = (roomIndex) => {
+    const updatedRooms = [...formData.rooms];
+    const newBed = {
+      bedNumber: '',
+      type: 'SINGLE',
+      status: 'AVAILABLE'
+    };
+    updatedRooms[roomIndex] = {
+      ...updatedRooms[roomIndex],
+      beds: [...(updatedRooms[roomIndex].beds || []), newBed]
+    };
+    setFormData({
+      ...formData,
+      rooms: updatedRooms
+    });
+  };
+
+  const handleUpdateBed = (roomIndex, bedIndex, field, value) => {
+    const updatedRooms = [...formData.rooms];
+    const updatedBeds = [...(updatedRooms[roomIndex].beds || [])];
+    updatedBeds[bedIndex] = {
+      ...updatedBeds[bedIndex],
+      [field]: value
+    };
+    updatedRooms[roomIndex] = {
+      ...updatedRooms[roomIndex],
+      beds: updatedBeds
+    };
+    setFormData({
+      ...formData,
+      rooms: updatedRooms
+    });
+  };
+
+  const handleDeleteBed = (roomIndex, bedIndex) => {
+    const updatedRooms = [...formData.rooms];
+    const updatedBeds = updatedRooms[roomIndex].beds.filter((_, i) => i !== bedIndex);
+    updatedRooms[roomIndex] = {
+      ...updatedRooms[roomIndex],
+      beds: updatedBeds
+    };
+    setFormData({
+      ...formData,
+      rooms: updatedRooms
+    });
+  };
+
+  const handleToggleActive = async (guestHouse) => {
+    try {
+      const updatedGuestHouse = {
+        ...guestHouse,
+        isActive: !guestHouse.isActive
+      };
+      await guestHouseAPI.update(guestHouse.id, updatedGuestHouse);
+      fetchGuestHouses();
+      toast.success(`Guest house ${updatedGuestHouse.isActive ? 'activated' : 'deactivated'} successfully`);
+    } catch (error) {
+      console.error('Error updating guest house status:', error);
+      toast.error('Failed to update guest house status');
     }
   };
 
   if (loading) {
     return (
-      <Container fluid className="p-4 text-center">
-        <Spinner animation="border" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </Spinner>
+      <Container fluid className="p-4">
+        <div className="text-center">
+          <Spinner animation="border" variant="primary" />
+        </div>
       </Container>
     );
   }
@@ -119,12 +208,7 @@ const GuestHouseManagement = () => {
   if (error) {
     return (
       <Container fluid className="p-4">
-        <Alert variant="danger">
-          {error}
-          <Button variant="outline-danger" size="sm" className="ms-3" onClick={fetchGuestHouses}>
-            Try Again
-          </Button>
-        </Alert>
+        <Alert variant="danger">{error}</Alert>
       </Container>
     );
   }
@@ -132,120 +216,301 @@ const GuestHouseManagement = () => {
   return (
     <Container fluid className="p-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Guest House Management</h2>
-        <Button variant="primary" onClick={() => handleShow()}>
+        <h2 className="page-title">Guest House Management</h2>
+        <Button variant="primary" className="add-button" onClick={() => handleShow(null)}>
           <FaPlus className="me-2" /> Add Guest House
         </Button>
       </div>
 
-      <Card className="shadow-sm">
-        <Card.Body>
-          {guestHouses.length === 0 ? (
-            <div className="text-center p-4">
-              <p className="text-muted">No guest houses found</p>
-              <Button variant="primary" size="sm" onClick={() => handleShow()}>
-                Add Guest House
-              </Button>
-            </div>
-          ) : (
-            <Table responsive hover>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Location</th>
-                  <th>Total Rooms</th>
-                  <th>Total Beds</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {guestHouses.map((house) => (
-                  <tr key={house._id || house.id}>
-                    <td>{house.name}</td>
-                    <td>{house.location}</td>
-                    <td>{house.totalRooms}</td>
-                    <td>{house.totalBeds}</td>
-                    <td>
-                      <span className={`badge bg-${house.isActive ? 'success' : 'danger'}`}>
-                        {house.isActive ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
-                    <td>
-                      <Button variant="outline-primary" size="sm" className="me-2" onClick={() => handleShow(house)}>
-                        <FaEdit />
-                      </Button>
-                      <Button variant="outline-danger" size="sm" onClick={() => handleDelete(house._id || house.id)}>
-                        <FaTrash />
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          )}
-        </Card.Body>
-      </Card>
+      {guestHouses.length === 0 ? (
+        <Card className="text-center p-5 empty-state">
+          <Card.Body>
+            <FaHotel size={48} className="mb-3 text-muted" />
+            <h4>No guest houses found</h4>
+            <p className="text-muted">Get started by adding your first guest house</p>
+            <Button variant="primary" onClick={() => handleShow(null)}>
+              Add Guest House
+            </Button>
+          </Card.Body>
+        </Card>
+      ) : (
+        <Row xs={1} md={2} lg={3} xl={4} className="g-4">
+          {guestHouses.map((guestHouse) => (
+            <Col key={guestHouse.id}>
+              <Card className="h-100 guest-house-card">
+                <Card.Body>
+                  <div className="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                      <Card.Title className="mb-1">{guestHouse.name}</Card.Title>
+                      <div className="text-muted location">
+                        <FaMapMarkerAlt className="me-1" />
+                        {guestHouse.location}
+                      </div>
+                    </div>
+                    <Badge 
+                      bg={guestHouse.isActive ? 'success' : 'danger'}
+                      className="status-badge"
+                    >
+                      {guestHouse.isActive ? 'Active' : 'Inactive'}
+                    </Badge>
+                  </div>
+
+                  <div className="stats-grid">
+                    <div className="stat-item">
+                      <div className="stat-label">Rooms</div>
+                      <div className="stat-value">
+                        <FaHotel className="me-1" />
+                        {guestHouse.rooms?.length || 0}
+                      </div>
+                    </div>
+                    <div className="stat-item">
+                      <div className="stat-label">Beds</div>
+                      <div className="stat-value">
+                        <FaBed className="me-1" />
+                        {guestHouse.rooms?.reduce(
+                          (total, room) => total + (room.beds?.length || 0),
+                          0
+                        ) || 0}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 d-flex justify-content-end gap-2">
+                    <Button
+                      variant="outline-primary"
+                      size="sm"
+                      onClick={() => handleShow(guestHouse)}
+                    >
+                      <FaEdit />
+                    </Button>
+                    <Button
+                      variant="outline-danger"
+                      size="sm"
+                      onClick={() => handleToggleActive(guestHouse)}
+                    >
+                      {guestHouse.isActive ? <FaTrash /> : <FaPlus />}
+                    </Button>
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      )}
 
       <Modal show={showModal} onHide={handleClose}>
         <Modal.Header closeButton>
-          <Modal.Title>{editingId ? 'Edit Guest House' : 'Add Guest House'}</Modal.Title>
+          <Modal.Title>
+            {editingId ? 'Edit Guest House' : 'Add Guest House'}
+          </Modal.Title>
         </Modal.Header>
-        <Form onSubmit={handleSubmit}>
-          <Modal.Body>
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Name</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Location</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={formData.location}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    required
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
-            <Form.Group className="mb-3">
-              <Form.Label>Description</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Status</Form.Label>
-              <Form.Select
-                value={formData.isActive}
-                onChange={(e) => setFormData({ ...formData, isActive: e.target.value === 'true' })}
+        <Modal.Body>
+          <Nav variant="tabs" className="mb-3">
+            <Nav.Item>
+              <Nav.Link 
+                active={activeTab === 'basic'}
+                onClick={() => setActiveTab('basic')}
               >
-                <option value="true">Active</option>
-                <option value="false">Inactive</option>
-              </Form.Select>
-            </Form.Group>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleClose}>
-              Cancel
-            </Button>
-            <Button variant="primary" type="submit">
-              {editingId ? 'Update' : 'Add'} Guest House
-            </Button>
-          </Modal.Footer>
-        </Form>
+                Basic Info
+              </Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Nav.Link 
+                active={activeTab === 'rooms'}
+                onClick={() => setActiveTab('rooms')}
+              >
+                Rooms & Beds
+              </Nav.Link>
+            </Nav.Item>
+          </Nav>
+
+          <Form onSubmit={handleSubmit}>
+            {activeTab === 'basic' ? (
+              <>
+                <Row>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Name</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="Enter guest house name"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        required
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Location</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="Enter location"
+                        value={formData.location}
+                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                        required
+                      />
+                    </Form.Group>
+                  </Col>
+                </Row>
+
+                <Form.Group className="mb-3">
+                  <Form.Label>Description</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={3}
+                    placeholder="Enter description"
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Check
+                    type="switch"
+                    id="active-switch"
+                    label="Active"
+                    checked={formData.isActive}
+                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                  />
+                </Form.Group>
+              </>
+            ) : (
+              <div className="rooms-section">
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <h6 className="mb-0">Rooms</h6>
+                  <Button variant="outline-primary" size="sm" onClick={handleAddRoom}>
+                    <FaPlus className="me-1" /> Add Room
+                  </Button>
+                </div>
+
+                {formData.rooms.map((room, roomIndex) => (
+                  <div key={roomIndex} className="room-card">
+                    <div className="room-header">
+                      <h6 className="mb-0">Room {roomIndex + 1}</h6>
+                      <Button
+                        variant="outline-danger"
+                        size="sm"
+                        onClick={() => handleDeleteRoom(roomIndex)}
+                      >
+                        <FaTrash />
+                      </Button>
+                    </div>
+                    <div className="card-body">
+                      <Row className="mb-3">
+                        <Col md={6}>
+                          <Form.Group>
+                            <Form.Label>Room Number</Form.Label>
+                            <Form.Control
+                              type="text"
+                              size="sm"
+                              value={room.roomNumber}
+                              onChange={(e) => handleUpdateRoom(roomIndex, 'roomNumber', e.target.value)}
+                              required
+                            />
+                          </Form.Group>
+                        </Col>
+                        <Col md={6}>
+                          <Form.Group>
+                            <Form.Label>Type</Form.Label>
+                            <Form.Select
+                              size="sm"
+                              value={room.type}
+                              onChange={(e) => handleUpdateRoom(roomIndex, 'type', e.target.value)}
+                            >
+                              <option value="STANDARD">Standard</option>
+                              <option value="DELUXE">Deluxe</option>
+                              <option value="SUITE">Suite</option>
+                            </Form.Select>
+                          </Form.Group>
+                        </Col>
+                      </Row>
+
+                      <div className="beds-section">
+                        <div className="d-flex justify-content-between align-items-center mb-2">
+                          <Form.Label className="mb-0">Beds</Form.Label>
+                          <Button
+                            variant="outline-primary"
+                            size="sm"
+                            onClick={() => handleAddBed(roomIndex)}
+                          >
+                            <FaPlus className="me-1" /> Add Bed
+                          </Button>
+                        </div>
+
+                        {room.beds?.length > 0 ? (
+                          <Table responsive bordered hover size="sm" className="beds-table mb-0">
+                            <thead>
+                              <tr>
+                                <th style={{width: "40%"}}>Bed Number</th>
+                                <th style={{width: "40%"}}>Type</th>
+                                <th style={{width: "20%"}}>Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {room.beds.map((bed, bedIndex) => (
+                                <tr key={bedIndex}>
+                                  <td>
+                                    <Form.Control
+                                      type="text"
+                                      size="sm"
+                                      value={bed.bedNumber}
+                                      onChange={(e) => handleUpdateBed(roomIndex, bedIndex, 'bedNumber', e.target.value)}
+                                    />
+                                  </td>
+                                  <td>
+                                    <Form.Select
+                                      size="sm"
+                                      value={bed.type}
+                                      onChange={(e) => handleUpdateBed(roomIndex, bedIndex, 'type', e.target.value)}
+                                    >
+                                      <option value="SINGLE">Single</option>
+                                      <option value="DOUBLE">Double</option>
+                                      <option value="QUEEN">Queen</option>
+                                      <option value="KING">King</option>
+                                    </Form.Select>
+                                  </td>
+                                  <td className="text-center">
+                                    <Button
+                                      variant="outline-danger"
+                                      size="sm"
+                                      onClick={() => handleDeleteBed(roomIndex, bedIndex)}
+                                    >
+                                      <FaTrash />
+                                    </Button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </Table>
+                        ) : (
+                          <div className="text-center text-muted py-3">
+                            No beds added yet
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {formData.rooms.length === 0 && (
+                  <div className="text-center text-muted py-4">
+                    No rooms added yet. Click the "Add Room" button to add your first room.
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="d-flex justify-content-end gap-2 mt-3">
+              <Button variant="secondary" onClick={handleClose}>
+                Cancel
+              </Button>
+              <Button variant="primary" type="submit">
+                {editingId ? 'Update' : 'Create'}
+              </Button>
+            </div>
+          </Form>
+        </Modal.Body>
       </Modal>
     </Container>
   );

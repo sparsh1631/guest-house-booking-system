@@ -20,6 +20,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/admin/guest-houses")
 @PreAuthorize("hasRole('ADMIN')") // Requires ADMIN role for all endpoints
+@CrossOrigin(origins = "*", maxAge = 3600)
 public class AdminGuestHouseController {
 
     private final AdminService adminService;
@@ -48,6 +49,7 @@ public class AdminGuestHouseController {
     public ResponseEntity<GuestHouseDTO> updateGuestHouse(
             @PathVariable Long id,
             @Valid @RequestBody GuestHouseDTO guestHouseDTO) {
+        guestHouseDTO.setId(id); // Ensure ID is set
         GuestHouseDTO updatedGuestHouse = adminService.updateGuestHouse(id, guestHouseDTO);
         return ResponseEntity.ok(updatedGuestHouse);
     }
@@ -59,8 +61,8 @@ public class AdminGuestHouseController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GuestHouseDTO> getGuestHouseById(@PathVariable Long id) {
-        GuestHouseDTO guestHouse = adminService.getGuestHouseById(id);
+    public ResponseEntity<GuestHouseWithRoomsDTO> getGuestHouseById(@PathVariable Long id) {
+        GuestHouseWithRoomsDTO guestHouse = adminService.getGuestHouseWithRooms(id);
         return ResponseEntity.ok(guestHouse);
     }
 
@@ -89,6 +91,7 @@ public class AdminGuestHouseController {
     public ResponseEntity<RoomDTO> updateRoom(
             @PathVariable Long id,
             @Valid @RequestBody RoomDTO roomDTO) {
+        roomDTO.setId(id); // Ensure ID is set
         RoomDTO updatedRoom = adminService.updateRoom(id, roomDTO);
         return ResponseEntity.ok(updatedRoom);
     }
@@ -119,6 +122,7 @@ public class AdminGuestHouseController {
     public ResponseEntity<BedDTO> updateBed(
             @PathVariable Long id,
             @Valid @RequestBody BedDTO bedDTO) {
+        bedDTO.setId(id); // Ensure ID is set
         BedDTO updatedBed = adminService.updateBed(id, bedDTO);
         return ResponseEntity.ok(updatedBed);
     }

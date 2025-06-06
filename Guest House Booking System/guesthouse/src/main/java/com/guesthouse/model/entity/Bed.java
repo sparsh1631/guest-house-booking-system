@@ -18,9 +18,6 @@ public class Bed {
     @Column(nullable = false)
     private BedType type;
 
-    @Column(nullable = false)
-    private Integer count;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private BedStatus status;
@@ -54,14 +51,6 @@ public class Bed {
 
     public void setType(BedType type) {
         this.type = type;
-    }
-
-    public Integer getCount() {
-        return count;
-    }
-
-    public void setCount(Integer count) {
-        this.count = count;
     }
 
     public BedStatus getStatus() {

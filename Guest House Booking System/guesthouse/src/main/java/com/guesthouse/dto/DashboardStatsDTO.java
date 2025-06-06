@@ -1,22 +1,20 @@
 package com.guesthouse.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class DashboardStatsDTO {
-    private long totalGuestHouses;
-    private long totalRooms;
-    private long totalBeds;
-    private long availableRooms;
-    private long occupiedRooms;
-    private long totalBookings;
-    private long pendingRequests;
-    private double totalRevenue;
-    private long totalUsers;
+    private Long totalGuestHouses = 0L;
+    private Long totalRooms = 0L;
+    private Long totalBeds = 0L;
+    private Long availableRooms = 0L;
+    private Long occupiedRooms = 0L;
+    private Long totalBookings = 0L;
+    private Long pendingRequests = 0L;
+    private Long totalUsers = 0L;
+    private Double totalRevenue = 0.0;
 } 
